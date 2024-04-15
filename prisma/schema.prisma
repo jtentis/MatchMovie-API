@@ -10,13 +10,16 @@ generator client {
 
 datasource db {
     provider = "postgresql"
-    url      = env("DATABASE_URL")
+    url = env("DATABASE_URL")
 }
 
 //npx prisma migrate dev
 //create match table
-model MembersMatchMovie {
-    id   String @id
-    name String
-    function String
+model User {
+  id        Int       @id @default(autoincrement())
+  name      String?
+  email     String    @unique
+  password  String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }

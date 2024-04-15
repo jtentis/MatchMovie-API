@@ -1,30 +1,12 @@
-import { Body, Controller, Get } from '@nestjs/common';
-import { AppService } from './database/app.service';
-import { PrismaService } from './database/prisma.service';
-import { randomUUID } from 'crypto';
-import { CreateTeamMemberBody } from './dto/create-team-member-body';
-
+import { Controller, Get } from '@nestjs/common';
+import { AppService } from './app.service';
 
 @Controller()
 export class AppController {
-  constructor(
-    private readonly appService: AppService,
-    private readonly prisma: PrismaService,
-  ) { }
+  constructor(private readonly appService: AppService) {}
 
   @Get()
-  async getHello(@Body() body: CreateTeamMemberBody) {
-    console.log(body)
-    const { name, function: doingFunction} = body
-
-    const member = await this.prisma.membersMatchMovie.create({
-      data :{
-        id: randomUUID(),
-        name: name,
-        function: doingFunction
-      }
-    })
-
-    return member
+  getHello(): string {
+    return this.appService.getHello();
   }
 }
