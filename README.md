@@ -87,3 +87,6 @@ npm i @prisma/client
 # See prisma studio
 
 npx prisma studio
+
+# run seed 
+npx prisma db seed
