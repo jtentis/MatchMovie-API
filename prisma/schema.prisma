@@ -16,10 +16,33 @@ datasource db {
 //npx prisma migrate dev
 //create match table
 model User {
-  id        Int       @id @default(autoincrement())
-  name      String?
-  email     String    @unique
-  password  String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id            Int       @id @default(autoincrement())
+  name          String?
+  email         String    @unique
+  password      String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  favoriteMovies Movie[]   @relation("FavoriteMovies")
+  watchedMovies  Movie[]   @relation("WatchedMovies")
+  groups        Group[]   @relation("GroupUsers")
+}
+
+model Movie {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  releaseDate DateTime?
+  favoritedBy User[]   @relation("FavoriteMovies")
+  watchedBy   User[]   @relation("WatchedMovies")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Group {
+  id            Int       @id @default(autoincrement())
+  name          String
+  image         String?
+  users         User[]    @relation("GroupUsers")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
