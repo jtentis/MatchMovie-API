@@ -90,3 +90,9 @@ npx prisma studio
 
 # run seed 
 npx prisma db seed
+
+# node 18
+nvm use 18
+
+# start api
+npm start dev
