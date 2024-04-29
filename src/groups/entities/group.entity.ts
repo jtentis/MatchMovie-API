@@ -18,7 +18,7 @@ export class GroupEntity implements Group {
     image: string;
   
     @ApiProperty()
-    users: any[]; // A relação com os usuários que fazem parte do grupo
+    users: any[];
   
     @ApiProperty()
     createdAt: Date;
