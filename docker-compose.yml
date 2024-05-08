@@ -1,18 +1,35 @@
 # docker-compose.yml
 
-version: '3.8'
+version: '3.9'
 services:
 
   postgres:
     image: postgres:13.5
     restart: always
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
     volumes:
       - postgres:/var/lib/postgresql/data
     ports:
       - '5431:5432'
 
+  pgadmin-compose:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "jps.tentis@gmail.com"
+      PGADMIN_DEFAULT_PASSWORD: "pass"
+    ports:
+      - "15433:80"
+    depends_on:
+      - postgres
+    networks:
+      - postgres-compose-network
+
 volumes:
   postgres:
+
+networks:
+  postgres-compose-network:
+    driver: bridge

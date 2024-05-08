@@ -8,8 +8,12 @@ const roundsOfHashing = 10;
 
 async function main() {
 
+  const password = (senha) => {
+    return bcrypt.hash(senha, roundsOfHashing);
+}
   const eduardo = await bcrypt.hash('007oterrordosmlk', roundsOfHashing);
   const tom = await bcrypt.hash('tomtom157', roundsOfHashing);
+  const joao = await bcrypt.hash('joao69', roundsOfHashing);
 
   const user1 = await prisma.user.upsert({
     where: { email: 'doandradejr@gmail.com' },
@@ -32,6 +36,18 @@ async function main() {
       email: 'tom@gmail.com',
       name: 'Tom Richard',
       password: tom,
+    },
+  });
+
+  const user3 = await prisma.user.upsert({
+    where: { email: 'joao@lindo.com' },
+    update: {
+      password: joao
+    },
+    create: {
+      email: 'joao@lindo.com',
+      name: 'Joao Penis',
+      password: joao,
     },
   });
 
