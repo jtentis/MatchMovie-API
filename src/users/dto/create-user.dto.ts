@@ -12,6 +12,16 @@ export class CreateUserDto {
   @IsString()
   @IsNotEmpty()
   @ApiProperty()
+  second_name: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty()
+  user: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty()
   email: string;
 
   @IsString()
@@ -19,4 +29,26 @@ export class CreateUserDto {
   @MinLength(6)
   @ApiProperty()
   password: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(6)
+  @ApiProperty()
+  conf_password: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(11)
+  @ApiProperty()
+  cpf: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty()
+  location: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty()
+  location_number: string;
 }

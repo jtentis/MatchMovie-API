@@ -22,32 +22,32 @@ async function main() {
     },
     create: {
       email: 'doandradejr@gmail.com',
-      name: 'Eduardo Torres',
+      name: 'Eduardo',
+      second_name: 'Torres',
+      user: 'duds',
       password: eduardo,
+      conf_password: eduardo,
+      cpf: '11111111111',
+      location: 'Geremario Dantas',
+      location_number: '480'
     },
   });
 
   const user2 = await prisma.user.upsert({
-    where: { email: 'tom@gmail.com' },
-    update: {
-      password: tom
-    },
-    create: {
-      email: 'tom@gmail.com',
-      name: 'Tom Richard',
-      password: tom,
-    },
-  });
-
-  const user3 = await prisma.user.upsert({
     where: { email: 'joao@lindo.com' },
     update: {
       password: joao
     },
     create: {
       email: 'joao@lindo.com',
-      name: 'Joao Penis',
+      name: 'joao',
+      second_name: 'pedro',
+      user: 'jtentis',
       password: joao,
+      conf_password: joao,
+      cpf: '12312312312',
+      location: 'Geremario Dantas',
+      location_number: '480'
     },
   });
 
