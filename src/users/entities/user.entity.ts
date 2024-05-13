@@ -21,6 +21,24 @@ export class UserEntity implements User {
   name: string;
 
   @ApiProperty()
+  second_name: string;
+
+  @ApiProperty()
+  user: string;
+
+  @ApiProperty()
+  conf_password: string;
+
+  @ApiProperty()
+  location: string;
+
+  @ApiProperty()
+  location_number: string;
+
+  @ApiProperty()
+  cpf: string;
+
+  @ApiProperty()
   email: string;
 
   @Exclude()
