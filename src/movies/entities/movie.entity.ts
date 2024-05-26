@@ -14,7 +14,7 @@ export class MovieEntity implements Movie {
     title: string;
 
     @ApiProperty()
-    description: string;
+    genero: string;
 
     @ApiProperty()
     releaseDate: Date;

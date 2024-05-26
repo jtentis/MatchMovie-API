@@ -1,9 +1,17 @@
-import { IsNotEmpty, IsOptional } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
-export class CreateGroupDto {
+
+export class CreateMovieDto {
+  @IsString()
   @IsNotEmpty()
-  name: string;
+  @ApiProperty()
+  titulo: string;
 
-  @IsOptional()
-  image?: string;
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty()
+  genero: string;
+
+
 }

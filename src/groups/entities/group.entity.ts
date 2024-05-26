@@ -15,9 +15,6 @@ export class GroupEntity implements Group {
     name: string;
   
     @ApiProperty()
-    image: string;
-  
-    @ApiProperty()
     users: any[];
   
     @ApiProperty()
