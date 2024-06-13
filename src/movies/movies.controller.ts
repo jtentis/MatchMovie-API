@@ -55,5 +55,17 @@ export class MoviesController {
     }
     return userMovies;
   }
+
+
+  @Get('popular')
+  async getPopularMovies() {
+    const movies = await this.moviesService.getPopularMovies();
+    return movies;
+  }
+  // @Get('movies')
+  // async getAllMovies() {
+  //   const movies = await this.moviesService.getAllMovies();
+  //   return movies;
+  // }
   
 }
