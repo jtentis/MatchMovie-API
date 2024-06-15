@@ -1,9 +1,16 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { HttpService } from '@nestjs/axios';
+import { lastValueFrom } from 'rxjs';
+
 
 @Injectable()
 export class MoviesService {
-  constructor(private prisma: PrismaService) {}
+
+  private readonly TMDB_API_KEY = '2017240ed8d4e61fbe9ed801fe5da25a';
+  private readonly TMDB_API_URL = 'https://api.themoviedb.org/3';
+
+  constructor(private prisma: PrismaService, private readonly httpService: HttpService ) { }
 
   async favoriteMovie(userId: number, movieId: number) {
     const user = await this.prisma.user.findUnique({
@@ -60,5 +67,33 @@ export class MoviesService {
       favoriteMovies: user.favoriteMovies,
       watchedMovies: user.watchedMovies,
     };
+  }
+  // const url = 'https://api.themoviedb.org/3/movie/popular?language=en-US&page=1';
+
+  async getPopularMovies(): Promise<any> {
+    const response$ = this.httpService.get(
+      `${this.TMDB_API_URL}/movie/popular?language=pt-BR&page=1`,
+      {
+        params: {
+          api_key: this.TMDB_API_KEY,
+        },
+      },
+    );
+    const response = await lastValueFrom(response$);
+    return response.data;
+  }
+
+  async getMoviesByString(query: string): Promise<any> {
+    const response$ = this.httpService.get(
+
+      `${this.TMDB_API_URL}/search/movie?query=${query}&include_adult=false&language=pt-br&page=1`,
+      {
+        params: {
+          api_key: this.TMDB_API_KEY,
+        },
+      },
+    );
+    const response = await lastValueFrom(response$);
+    return response.data;
   }
 }

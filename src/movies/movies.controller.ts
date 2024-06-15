@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Param, NotFoundException, ConflictException } from '@nestjs/common';
+import { Controller, Post, Get, Param, NotFoundException, ConflictException, Query } from '@nestjs/common';
 import { MoviesService } from './movies.service';
 import { ApiTags } from "@nestjs/swagger";
 
@@ -54,6 +54,19 @@ export class MoviesController {
       throw new NotFoundException('Usuário não encontrado');
     }
     return userMovies;
+  }
+
+
+  @Get('popular')
+  async getPopularMovies() {
+    const movies = await this.moviesService.getPopularMovies();
+    return movies;
+  }
+  
+  @Get('movies')
+  async getMoviesBy(@Query('search') search: string) {
+    const movies = await this.moviesService.getMoviesByString(search);
+    return movies;
   }
   
 }
