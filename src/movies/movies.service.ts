@@ -83,16 +83,17 @@ export class MoviesService {
     return response.data;
   }
 
-  // async getAllMovies(): Promise<any> {
-  //   const response$ = this.httpService.get(
-  //     `https://api.themoviedb.org/3/search/movie?include_adult=false&language=en-US&page=2`,
-  //     {
-  //       params: {
-  //         api_key: this.TMDB_API_KEY,
-  //       },
-  //     },
-  //   );
-  //   const response = await lastValueFrom(response$);
-  //   return response.data;
-  // }
+  async getMoviesByString(query: string): Promise<any> {
+    const response$ = this.httpService.get(
+
+      `${this.TMDB_API_URL}/search/movie?query=${query}&include_adult=false&language=pt-br&page=1`,
+      {
+        params: {
+          api_key: this.TMDB_API_KEY,
+        },
+      },
+    );
+    const response = await lastValueFrom(response$);
+    return response.data;
+  }
 }
