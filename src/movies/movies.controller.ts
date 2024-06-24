@@ -1,6 +1,6 @@
 import { Controller, Post, Get, Param, NotFoundException, ConflictException, Query } from '@nestjs/common';
 import { MoviesService } from './movies.service';
-import { ApiTags } from "@nestjs/swagger";
+import {ApiQuery, ApiTags} from "@nestjs/swagger";
 
 @Controller('movies')
 @ApiTags('movies')
@@ -56,14 +56,43 @@ export class MoviesController {
     return userMovies;
   }
 
-
   @Get('popular')
-  async getPopularMovies() {
-    const movies = await this.moviesService.getPopularMovies();
+  @ApiQuery({
+    required: false
+  })
+  async getPopularMovies(@Query('page') page: number = 1) {
+    const movies = await this.moviesService.getPopularMovies(page);
     return movies;
   }
-  
-  @Get('movies')
+
+  @Get('top_rated')
+  @ApiQuery({
+    required: false
+  })
+  async getTopRatedMovies(@Query('page') page: number = 1) {
+    const movies = await this.moviesService.getTopRatedMovies(page);
+    return movies;
+  }
+
+  @Get('now_playing')
+  @ApiQuery({
+    required: false
+  })
+  async getNowPlayingMovies(@Query('page') page: number = 1) {
+    const movies = await this.moviesService.getNowPlayingMovies(page);
+    return movies;
+  }
+
+  @Get('upcoming')
+  @ApiQuery({
+    required: false
+  })
+  async getUpComingMovies(@Query('page') page: number = 1) {
+    const movies = await this.moviesService.getUpComingMovies(page);
+    return movies;
+  }
+
+  @Get('search')
   async getMoviesBy(@Query('search') search: string) {
     const movies = await this.moviesService.getMoviesByString(search);
     return movies;
