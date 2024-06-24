@@ -70,9 +70,9 @@ export class MoviesService {
   }
   // const url = 'https://api.themoviedb.org/3/movie/popular?language=en-US&page=1';
 
-  async getPopularMovies(): Promise<any> {
+  async getPopularMovies(page?: number): Promise<any> {
     const response$ = this.httpService.get(
-      `${this.TMDB_API_URL}/movie/popular?language=pt-BR&page=1`,
+      `${this.TMDB_API_URL}/movie/popular?language=pt-BR&page=${page}`,
       {
         params: {
           api_key: this.TMDB_API_KEY,
@@ -83,10 +83,49 @@ export class MoviesService {
     return response.data;
   }
 
+  async getTopRatedMovies(page?: number): Promise<any> {
+    const response$ = this.httpService.get(
+        `${this.TMDB_API_URL}/movie/top_rated?language=pt-BR&page=${page}`,
+        {
+          params: {
+            api_key: this.TMDB_API_KEY,
+          },
+        },
+    );
+    const response = await lastValueFrom(response$);
+    return response.data;
+  }
+
+  async getNowPlayingMovies(page?: number): Promise<any> {
+    const response$ = this.httpService.get(
+        `${this.TMDB_API_URL}/movie/now_playing?language=pt-BR&page=${page}`,
+        {
+          params: {
+            api_key: this.TMDB_API_KEY,
+          },
+        },
+    );
+    const response = await lastValueFrom(response$);
+    return response.data;
+  }
+
+  async getUpComingMovies(page?: number): Promise<any> {
+    const response$ = this.httpService.get(
+        `${this.TMDB_API_URL}/movie/upcoming?language=pt-BR&page=${page}`,
+        {
+          params: {
+            api_key: this.TMDB_API_KEY,
+          },
+        },
+    );
+    const response = await lastValueFrom(response$);
+    return response.data;
+  }
+
   async getMoviesByString(query: string): Promise<any> {
     const response$ = this.httpService.get(
 
-      `${this.TMDB_API_URL}/search/movie?query=${query}&include_adult=false&language=pt-br&page=1`,
+      `${this.TMDB_API_URL}/search/movie?query=${query}&language=pt-br`,
       {
         params: {
           api_key: this.TMDB_API_KEY,
