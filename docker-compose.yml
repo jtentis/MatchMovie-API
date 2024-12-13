@@ -3,8 +3,24 @@
 version: '3.9'
 services:
 
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: app
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}
+      DEBUG: prisma:client
+    depends_on:
+      - postgres
+    networks:
+      - app_network
+
   postgres:
     image: postgres:13.5
+    container_name: db
     restart: always
     environment:
       POSTGRES_USER: ${DB_USER}
@@ -13,23 +29,26 @@ services:
     volumes:
       - postgres:/var/lib/postgresql/data
     ports:
-      - '5431:5432'
+      - '5432:5432'
+    networks:
+      - app_network
 
   pgadmin-compose:
     image: dpage/pgadmin4
+    container_name: pgadmin
     environment:
       PGADMIN_DEFAULT_EMAIL: "jps.tentis@gmail.com"
       PGADMIN_DEFAULT_PASSWORD: "pass"
     ports:
-      - "15433:80"
+      - "5050:80"
     depends_on:
       - postgres
     networks:
-      - postgres-compose-network
+      - app_network
 
 volumes:
   postgres:
 
 networks:
-  postgres-compose-network:
+  app_network:
     driver: bridge
