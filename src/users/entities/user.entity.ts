@@ -27,9 +27,6 @@ export class UserEntity implements User {
   user: string;
 
   @ApiProperty()
-  conf_password: string;
-
-  @ApiProperty()
   location: string;
 
   @ApiProperty()

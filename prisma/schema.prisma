@@ -22,7 +22,6 @@ model User {
   user          String    @unique
   email         String    @unique
   password      String
-  conf_password String
   cpf           String    @unique
   location      String
   location_number   String
