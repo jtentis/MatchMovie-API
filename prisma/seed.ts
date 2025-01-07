@@ -26,7 +26,6 @@ async function main() {
       second_name: 'Torres',
       user: 'duds',
       password: eduardo,
-      conf_password: eduardo,
       cpf: '11111111111',
       location: 'Geremario Dantas',
       location_number: '480'
@@ -44,7 +43,6 @@ async function main() {
       second_name: 'pedro',
       user: 'jtentis',
       password: joao,
-      conf_password: joao,
       cpf: '12312312312',
       location: 'Geremario Dantas',
       location_number: '480'

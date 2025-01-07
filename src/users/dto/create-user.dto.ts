@@ -32,12 +32,6 @@ export class CreateUserDto {
 
   @IsString()
   @IsNotEmpty()
-  @MinLength(6)
-  @ApiProperty()
-  conf_password: string;
-
-  @IsString()
-  @IsNotEmpty()
   @MinLength(11)
   @ApiProperty()
   cpf: string;
