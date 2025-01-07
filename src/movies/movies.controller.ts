@@ -1,5 +1,6 @@
-import { ConflictException, Controller, Get, NotFoundException, Param, Post, Query } from '@nestjs/common';
-import { ApiParam, ApiQuery, ApiTags } from "@nestjs/swagger";
+import { ConflictException, Controller, Get, NotFoundException, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiParam, ApiQuery, ApiTags } from "@nestjs/swagger";
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { MoviesService } from './movies.service';
 
 @Controller('movies')
@@ -46,6 +47,8 @@ export class MoviesController {
   }
 
   @Get('popular')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiQuery({
     name: 'page',
     required: false,

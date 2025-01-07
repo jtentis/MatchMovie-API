@@ -1,6 +1,5 @@
-// src/users/users.controller.ts
-
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -9,7 +8,9 @@ import {
   ParseIntPipe,
   Patch,
   Post,
-  UseGuards
+  UseGuards,
+  UsePipes,
+  ValidationPipe
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
@@ -25,9 +26,11 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
   @ApiCreatedResponse({ type: UserEntity })
+  @UsePipes(new ValidationPipe({ 
+    transform: true, // automatically transform payload to DTO
+    exceptionFactory: (errors) => new BadRequestException(errors), // customize error handling
+  }))
   async create(@Body() createUserDto: CreateUserDto) {
     return new UserEntity(await this.usersService.create(createUserDto));
   }
