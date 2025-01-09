@@ -9,6 +9,7 @@ export class MoviesService {
 
   private readonly TMDB_API_KEY = process.env.TMDB_API_KEY;
   private readonly TMDB_API_URL = 'https://api.themoviedb.org/3';
+  private readonly TMDB_API_POSTER_URL = 'https://image.tmdb.org/t/p/w500';
 
   constructor(private prisma: PrismaService, private readonly httpService: HttpService) { }
 
@@ -52,7 +53,7 @@ export class MoviesService {
 
   async getPopularMovies(page: number = 1): Promise<any> {
     const response$ = this.httpService.get(
-      `${this.TMDB_API_URL}/movie/popular?language=pt-BR`,
+      `${this.TMDB_API_URL}/movie/popular?language=pt-BR&region=BR&page=${page}`,
       {
         params: {
           api_key: this.TMDB_API_KEY,
@@ -66,7 +67,7 @@ export class MoviesService {
 
   async getTopRatedMovies(page: number = 1): Promise<any> {
     const response$ = this.httpService.get(
-      `${this.TMDB_API_URL}/movie/top_rated?language=pt-BR&page=${page}`,
+      `${this.TMDB_API_URL}/movie/top_rated?language=pt-BR&region=BR&page=${page}`,
       {
         params: {
           api_key: this.TMDB_API_KEY,
@@ -80,7 +81,7 @@ export class MoviesService {
 
   async getNowPlayingMovies(page: number = 1): Promise<any> {
     const response$ = this.httpService.get(
-      `${this.TMDB_API_URL}/movie/now_playing?language=pt-BR&page=${page}`,
+      `${this.TMDB_API_URL}/movie/now_playing?language=pt-BR&region=BR&page=${page}`,
       {
         params: {
           api_key: this.TMDB_API_KEY,
@@ -94,7 +95,7 @@ export class MoviesService {
 
   async getUpComingMovies(page: number = 1): Promise<any> {
     const response$ = this.httpService.get(
-      `${this.TMDB_API_URL}/movie/upcoming?language=pt-BR&page=${page}`,
+      `${this.TMDB_API_URL}/movie/upcoming?language=pt-BR&region=BR&page=${page}`,
       {
         params: {
           api_key: this.TMDB_API_KEY,
@@ -109,7 +110,7 @@ export class MoviesService {
   async getMoviesByString(query: string, page: number = 1): Promise<any> {
     const response$ = this.httpService.get(
 
-      `${this.TMDB_API_URL}/search/movie?query=${query}&language=pt-BR&page=${page}`,
+      `${this.TMDB_API_URL}/search/movie?query=${query}&language=pt-BR&region=BR&page=${page}`,
       {
         params: {
           api_key: this.TMDB_API_KEY,
@@ -147,5 +148,24 @@ export class MoviesService {
     );
     const response = await lastValueFrom(response$);
     return response.data;
+  }
+
+  async getMoviePoster(poster_path: string): Promise<any> {
+    const response$ = this.httpService.get(
+      `${this.TMDB_API_POSTER_URL}${poster_path}`,
+      {
+        headers:{
+          'Content-type' : 'image/jpeg',
+          
+        },
+        responseType: 'arraybuffer'
+      }
+    );
+    const response = await lastValueFrom(response$);
+    const byteArray = new Uint8Array(response.data);
+
+    const base64Image = Buffer.from(byteArray).toString('base64');
+    const src = `${base64Image}`;
+    return src;
   }
 }
