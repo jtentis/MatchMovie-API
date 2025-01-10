@@ -123,7 +123,7 @@ export class MoviesController {
     return movies;
   }
 
-  @Get('poster/:moviePoster')
+  @Get(':moviePoster/poster')
   @ApiParam({
     name: 'moviePoster',
     required: true,
