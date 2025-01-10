@@ -15,7 +15,7 @@ export const jwtSecret = 'zjP9h6ZI5LoSKCRj';
     PassportModule,
     JwtModule.register({
       secret: jwtSecret,
-      signOptions: { expiresIn: '7d' }, // e.g. 30s, 7d, 24h
+      signOptions: { expiresIn: '30s' }, // e.g. 30s, 7d, 24h
     }),
     UsersModule,
   ],
