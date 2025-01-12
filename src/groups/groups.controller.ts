@@ -1,13 +1,5 @@
-<<<<<<< HEAD
-import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards, Req } from '@nestjs/common';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiTags } from "@nestjs/swagger";
-import { GroupsService } from './groups.service';
-import { GroupEntity } from './entities/group.entity';
-=======
 import { Body, Controller, Delete, Get, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiTags } from "@nestjs/swagger";
->>>>>>> 7e7c17ed359c757ebafa80a9ddaa65739cda9c4e
 import { Request } from 'express';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { CreateGroupDto } from './dto/create-group.dto';

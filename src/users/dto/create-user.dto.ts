@@ -32,15 +32,6 @@ export class CreateUserDto {
 
   @IsString()
   @IsNotEmpty()
-<<<<<<< HEAD
-  @MinLength(6)
-  @ApiProperty()
-  conf_password: string;
-
-  @IsString()
-  @IsNotEmpty()
-=======
->>>>>>> 7e7c17ed359c757ebafa80a9ddaa65739cda9c4e
   @MinLength(11)
   @ApiProperty()
   cpf: string;
@@ -54,8 +45,4 @@ export class CreateUserDto {
   @IsNotEmpty()
   @ApiProperty()
   location_number: string;
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 7e7c17ed359c757ebafa80a9ddaa65739cda9c4e
