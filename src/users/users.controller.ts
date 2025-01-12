@@ -1,22 +1,23 @@
-// src/users/users.controller.ts
-
 import {
-  Controller,
-  Get,
-  Post,
+  BadRequestException,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
+  Param,
   ParseIntPipe,
-  UseGuards
+  Patch,
+  Post,
+  UseGuards,
+  UsePipes,
+  ValidationPipe
 } from '@nestjs/common';
-import { UsersService } from './users.service';
+import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { UserEntity } from './entities/user.entity';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { UsersService } from './users.service';
 
 
 @Controller('users')
@@ -26,6 +27,10 @@ export class UsersController {
 
   @Post()
   @ApiCreatedResponse({ type: UserEntity })
+  @UsePipes(new ValidationPipe({ 
+    transform: true, // automatically transform payload to DTO
+    exceptionFactory: (errors) => new BadRequestException(errors), // customize error handling
+  }))
   async create(@Body() createUserDto: CreateUserDto) {
     return new UserEntity(await this.usersService.create(createUserDto));
   }

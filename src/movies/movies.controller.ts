@@ -1,6 +1,6 @@
-import { Controller, Post, Get, Param, NotFoundException, ConflictException, Query } from '@nestjs/common';
+import { ConflictException, Controller, Get, NotFoundException, Param, Post, Query } from '@nestjs/common';
+import { ApiParam, ApiQuery, ApiTags } from "@nestjs/swagger";
 import { MoviesService } from './movies.service';
-import {ApiQuery, ApiTags} from "@nestjs/swagger";
 
 @Controller('movies')
 @ApiTags('movies')
@@ -45,29 +45,23 @@ export class MoviesController {
     }
   }
 
-  @Get('user/:userId')
-  async getUserMovies(
-    @Param('userId') userId: string,
-  ) {
-    const userMovies = await this.moviesService.getUserMovies(parseInt(userId));
-    if (!userMovies) {
-      throw new NotFoundException('Usuário não encontrado');
-    }
-    return userMovies;
-  }
-
   @Get('popular')
   @ApiQuery({
-    required: false
+    name: 'page',
+    required: false,
+    type: Number,
   })
   async getPopularMovies(@Query('page') page: number = 1) {
     const movies = await this.moviesService.getPopularMovies(page);
     return movies;
   }
+  
 
   @Get('top_rated')
   @ApiQuery({
-    required: false
+    name: 'page',
+    required: false,
+    type: Number,
   })
   async getTopRatedMovies(@Query('page') page: number = 1) {
     const movies = await this.moviesService.getTopRatedMovies(page);
@@ -76,7 +70,9 @@ export class MoviesController {
 
   @Get('now_playing')
   @ApiQuery({
-    required: false
+    name: 'page',
+    required: false,
+    type: Number,
   })
   async getNowPlayingMovies(@Query('page') page: number = 1) {
     const movies = await this.moviesService.getNowPlayingMovies(page);
@@ -85,7 +81,9 @@ export class MoviesController {
 
   @Get('upcoming')
   @ApiQuery({
-    required: false
+    name: 'page',
+    required: false,
+    type: Number,
   })
   async getUpComingMovies(@Query('page') page: number = 1) {
     const movies = await this.moviesService.getUpComingMovies(page);
@@ -93,9 +91,46 @@ export class MoviesController {
   }
 
   @Get('search')
-  async getMoviesBy(@Query('search') search: string) {
-    const movies = await this.moviesService.getMoviesByString(search);
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+  })
+  async getMoviesByString(@Query('search') search: string, @Query('page') page: number = 1) {
+    const movies = await this.moviesService.getMoviesByString(search, page);
     return movies;
   }
-  
+
+  @Get(':movieId/details')
+  @ApiParam({
+    name: 'movieId',
+    required: true,
+    type: Number,
+  })
+  async getMovieDetails(@Param('movieId') movieId: number) {
+    const movies = await this.moviesService.getMovieDetails(movieId);
+    return movies;
+  }
+
+  @Get(':movieId/watch_providers')
+  @ApiParam({
+    name: 'movieId',
+    required: true,
+    type: Number,
+  })
+  async getMovieWatchProviders(@Param('movieId') movieId: number) {
+    const movies = await this.moviesService.getMovieWatchProviders(movieId);
+    return movies;
+  }
+
+  @Get(':moviePoster/poster')
+  @ApiParam({
+    name: 'moviePoster',
+    required: true,
+    type: String,
+  })
+  async getMoviePoster(@Param('moviePoster') moviePoster: string) {
+    const movies = await this.moviesService.getMoviePoster(moviePoster);
+    return movies;
+  }
 }
