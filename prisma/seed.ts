@@ -49,25 +49,25 @@ async function main() {
     },
   });
 
-  const movie1 = await prisma.movie.create({
-    data: {
-      title: 'The Shawshank Redemption',
-      description: 'Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.',
-      releaseDate: new Date('1994-09-23'),
-      favoritedBy: { connect: { id: user1.id } },
-      watchedBy: { connect: { id: user2.id } },
-    },
-  });
+  // const movie1 = await prisma.movie.create({
+  //   data: {
+  //     title: 'The Shawshank Redemption',
+  //     description: 'Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.',
+  //     releaseDate: new Date('1994-09-23'),
+  //     favoritedBy: { connect: { id: user1.id } },
+  //     watchedBy: { connect: { id: user2.id } },
+  //   },
+  // });
 
-  const movie2 = await prisma.movie.create({
-    data: {
-      title: 'The Godfather',
-      description: 'An organized crime dynastys aging patriarch transfers control of his clandestine empire to his reluctant son.',
-      releaseDate: new Date('1972-03-24'),
-      favoritedBy: { connect: { id: user1.id } },
-      watchedBy: { connect: { id: user2.id } },
-    },
-  });
+  // const movie2 = await prisma.movie.create({
+  //   data: {
+  //     title: 'The Godfather',
+  //     description: 'An organized crime dynastys aging patriarch transfers control of his clandestine empire to his reluctant son.',
+  //     releaseDate: new Date('1972-03-24'),
+  //     favoritedBy: { connect: { id: user1.id } },
+  //     watchedBy: { connect: { id: user2.id } },
+  //   },
+  // });
 
   const group = await prisma.group.create({
     data: {
@@ -77,7 +77,7 @@ async function main() {
     },
   });
 
-  console.log({ user1, user2, movie1, movie2, group });
+  console.log({ user1, user2, group });
 }
 
 // execute the main function
