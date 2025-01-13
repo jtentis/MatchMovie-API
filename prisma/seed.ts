@@ -27,8 +27,7 @@ async function main() {
       user: 'duds',
       password: eduardo,
       cpf: '11111111111',
-      location: 'Geremario Dantas',
-      location_number: '480'
+      location: '22740010',
     },
   });
 
@@ -44,8 +43,7 @@ async function main() {
       user: 'jtentis',
       password: joao,
       cpf: '12312312312',
-      location: 'Geremario Dantas',
-      location_number: '480'
+      location: '22740010',
     },
   });
 

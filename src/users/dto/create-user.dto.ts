@@ -40,9 +40,4 @@ export class CreateUserDto {
   @IsNotEmpty()
   @ApiProperty()
   location: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @ApiProperty()
-  location_number: string;
 }
