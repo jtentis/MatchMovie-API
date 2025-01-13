@@ -1,12 +1,12 @@
 import {
-    Injectable,
-    NotFoundException,
-    UnauthorizedException,
-  } from '@nestjs/common';
-  import { PrismaService } from './../prisma/prisma.service';
-  import { JwtService } from '@nestjs/jwt';
-  import { AuthEntity } from './entity/auth.entity';
-  import * as bcrypt from 'bcrypt';
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcrypt';
+import { PrismaService } from './../prisma/prisma.service';
+import { AuthEntity } from './entity/auth.entity';
   
   @Injectable()
   export class AuthService {
@@ -28,6 +28,7 @@ import {
   
       return {
         accessToken: this.jwtService.sign({ userId: user.id }),
+        userId: user.id,
       };
     }
   }

@@ -1,5 +1,5 @@
 import { HttpService } from '@nestjs/axios';
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { lastValueFrom } from 'rxjs';
 import { PrismaService } from 'src/prisma/prisma.service';
 
@@ -14,41 +14,73 @@ export class MoviesService {
   constructor(private prisma: PrismaService, private readonly httpService: HttpService) { }
 
   async favoriteMovie(userId: number, movieId: number) {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-    });
-
+    // Verificar se o usuário existe
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) {
-      throw new Error('Usuário não encontrado');
+      throw new NotFoundException('Usuário não encontrado.');
     }
 
-    return this.prisma.movie.update({
-      where: { id: movieId },
+    // Verificar se o filme já está favoritado pelo usuário
+    const alreadyFavorited = await this.prisma.favorite.findUnique({
+      where: { userId_movieId: { userId, movieId } },
+    });
+    if (alreadyFavorited) {
+      throw new ConflictException('Filme já está nos favoritos.');
+    }
+
+    // Criar o registro de favorito
+    await this.prisma.favorite.create({
       data: {
-        favoritedBy: {
-          connect: { id: userId },
-        },
+        userId,
+        movieId,
       },
     });
+
+    return true;
   }
 
-  async markAsWatched(userId: number, movieId: number) {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-    });
-
+  async toggleFavorite(userId: number, movieId: number): Promise<boolean> {
+    console.log('Chegando no toggleFavorite com:', { userId, movieId });
+  
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) {
-      throw new Error('Usuário não encontrado');
+      throw new NotFoundException('Usuário não encontrado.');
     }
-
-    return this.prisma.movie.update({
-      where: { id: movieId },
-      data: {
-        watchedBy: {
-          connect: { id: userId },
-        },
-      },
+  
+    const favorite = await this.prisma.favorite.findUnique({
+      where: { userId_movieId: { userId, movieId } },
     });
+  
+    if (favorite) {
+      console.log('Desfavoritando o filme:', { userId, movieId });
+      await this.prisma.favorite.delete({
+        where: { id: favorite.id },
+      });
+      return false;
+    } else {
+      console.log('Favoritando o filme:', { userId, movieId });
+      await this.prisma.favorite.create({
+        data: { userId, movieId },
+      });
+      return true;
+    }
+  }
+  
+
+  async isFavorite(userId: number, movieId: number): Promise<boolean> {
+    // // Verificar se o usuário existe
+    // const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    // if (!user) {
+    //   throw new NotFoundException('Usuário não encontrado.');
+    // }
+  
+    // Verificar se o filme já está favoritado
+    const favorite = await this.prisma.favorite.findUnique({
+      where: { userId_movieId: { userId, movieId } },
+    });
+  
+    // Retorna true se o filme foi favoritado, ou false caso contrário
+    return !!favorite;
   }
 
   async getPopularMovies(page: number = 1): Promise<any> {

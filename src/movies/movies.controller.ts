@@ -1,11 +1,20 @@
-import { ConflictException, Controller, Get, NotFoundException, Param, Post, Query } from '@nestjs/common';
+import { BadRequestException, Body, ConflictException, Controller, Get, InternalServerErrorException, NotFoundException, Param, Post, Query } from '@nestjs/common';
 import { ApiParam, ApiQuery, ApiTags } from "@nestjs/swagger";
+import { IsInt } from 'class-validator';
 import { MoviesService } from './movies.service';
+
+class ToggleFavoriteDto {
+  @IsInt()
+  userId: number;
+
+  @IsInt()
+  movieId: number;
+}
 
 @Controller('movies')
 @ApiTags('movies')
 export class MoviesController {
-  constructor(private readonly moviesService: MoviesService) {}
+  constructor(private readonly moviesService: MoviesService) { }
 
   @Post(':movieId/favorite/:userId')
   async favoriteMovie(
@@ -16,34 +25,58 @@ export class MoviesController {
       await this.moviesService.favoriteMovie(parseInt(userId), parseInt(movieId));
       return { message: 'Filme favoritado com sucesso!' };
     } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw new NotFoundException(error.message);
-      } else if (error instanceof ConflictException) {
-        throw new ConflictException(error.message);
-      } else {
-        throw new Error('Erro ao favoritar filme');
+      if (error instanceof NotFoundException || error instanceof ConflictException) {
+        throw error;
       }
+      throw new Error('Erro interno ao favoritar filme.');
     }
   }
 
-  @Post(':movieId/watched/:userId')
-  async markAsWatched(
-    @Param('movieId') movieId: string,
+  @Get('favorites/:userId/:movieId')
+  async isFavorite(
     @Param('userId') userId: string,
+    @Param('movieId') movieId: string,
   ) {
+    const numericUserId = parseInt(userId, 10);
+    const numericMovieId = parseInt(movieId, 10);
+  
+    if (isNaN(numericUserId) || isNaN(numericMovieId)) {
+      throw new BadRequestException('userId and movieId must be valid numbers.');
+    }
+  
     try {
-      await this.moviesService.markAsWatched(parseInt(userId), parseInt(movieId));
-      return { message: 'Filme marcado como assistido com sucesso!' };
+      const isFavorited = await this.moviesService.isFavorite(numericUserId, numericMovieId);
+      return { isFavorited };
     } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw new NotFoundException(error.message);
-      } else if (error instanceof ConflictException) {
-        throw new ConflictException(error.message);
-      } else {
-        throw new Error('Erro ao marcar filme como assistido');
-      }
+      console.error('Error in isFavorite:', error);
+      throw new InternalServerErrorException('Error checking favorite status.');
     }
   }
+
+  @Post('favorites')
+  async toggleFavorite(
+    @Body() { userId, movieId }: { userId: string | number; movieId: string | number },
+  ) {
+    const numericUserId = typeof userId === 'string' ? parseInt(userId, 10) : userId;
+    const numericMovieId = typeof movieId === 'string' ? parseInt(movieId, 10) : movieId;
+  
+    if (isNaN(numericUserId) || isNaN(numericMovieId)) {
+      throw new BadRequestException('userId and movieId must be valid numbers.');
+    }
+  
+    try {
+      const isFavorited = await this.moviesService.toggleFavorite(numericUserId, numericMovieId);
+      return {
+        message: isFavorited
+          ? 'Movie favorited successfully!'
+          : 'Movie unfavorited successfully!',
+      };
+    } catch (error) {
+      console.error('Error in toggleFavorite:', error);
+      throw new InternalServerErrorException('Error toggling favorite status.');
+    }
+  }
+  
 
   @Get('popular')
   @ApiQuery({
@@ -55,7 +88,7 @@ export class MoviesController {
     const movies = await this.moviesService.getPopularMovies(page);
     return movies;
   }
-  
+
 
   @Get('top_rated')
   @ApiQuery({
