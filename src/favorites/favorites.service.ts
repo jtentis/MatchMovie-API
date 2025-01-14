@@ -60,12 +60,29 @@ export class FavoritesService {
         }
     }
 
-
     async isFavorite(userId: number, movieId: number): Promise<boolean> {
+        console.log('Checking favorite for:', { userId, movieId });
+
+        if (typeof userId !== 'number' || typeof movieId !== 'number') {
+            throw new Error('Invalid userId or movieId. Must be integers.');
+        }
+
         const favorite = await this.prisma.favorite.findUnique({
-            where: { userId_movieId: { userId, movieId } },
+            where: {
+                userId_movieId: {
+                    userId,
+                    movieId,
+                },
+            },
         });
 
+        console.log('Favorite found:', favorite);
         return !!favorite;
+    }
+
+    async getUserFavorites(userId: number): Promise<number> {
+        return await this.prisma.favorite.count({
+            where: { userId }
+        });
     }
 }
