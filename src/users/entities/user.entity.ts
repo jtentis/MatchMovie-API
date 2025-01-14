@@ -30,9 +30,6 @@ export class UserEntity implements User {
   location: string;
 
   @ApiProperty()
-  location_number: string;
-
-  @ApiProperty()
   cpf: string;
 
   @ApiProperty()

@@ -60,8 +60,10 @@ export class UsersController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateUserDto: UpdateUserDto,
   ) {
+    console.log('UpdateUserDto received:', updateUserDto); 
     return new UserEntity(await this.usersService.update(id, updateUserDto));
   }
+  
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard)

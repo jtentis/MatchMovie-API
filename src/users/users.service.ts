@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -38,16 +38,34 @@ export class UsersService {
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
-    if (updateUserDto.password) {
-      updateUserDto.password = await bcrypt.hash(
-        updateUserDto.password,
-        roundsOfHashing,
-      );
+    // Fetch the current user data
+    const existingUser = await this.prisma.user.findUnique({
+      where: { id },
+    });
+  
+    if (!existingUser) {
+      throw new NotFoundException(`User with ID ${id} not found.`);
     }
-
+  
+    // Merge the provided fields with the existing user data
+    const updatedData = {
+      ...existingUser,
+      ...updateUserDto,
+    };
+  
+    // Handle password hashing if password is provided
+    if (updateUserDto.password) {
+      updatedData.password = await bcrypt.hash(updateUserDto.password, roundsOfHashing);
+    }
+  
+    // Update the user in the database
     return this.prisma.user.update({
       where: { id },
-      data: updateUserDto,
+      data: updatedData,
+      include: {
+        favorites: true,
+        watched: true,
+      },
     });
   }
 
