@@ -1,6 +1,7 @@
-import { BadRequestException, Body, ConflictException, Controller, Get, InternalServerErrorException, NotFoundException, Param, Post, Query } from '@nestjs/common';
-import { ApiParam, ApiQuery, ApiTags } from "@nestjs/swagger";
+import { Body, Controller, Get, InternalServerErrorException, Param, Post, Query } from '@nestjs/common';
+import { ApiParam, ApiProperty, ApiQuery, ApiTags } from "@nestjs/swagger";
 import { IsInt } from 'class-validator';
+import { FavoriteMovieDto } from './dto/favorite-movie.dto';
 import { MoviesService } from './movies.service';
 
 class ToggleFavoriteDto {
@@ -16,36 +17,14 @@ class ToggleFavoriteDto {
 export class MoviesController {
   constructor(private readonly moviesService: MoviesService) { }
 
-  @Post(':movieId/favorite/:userId')
-  async favoriteMovie(
-    @Param('movieId') movieId: string,
-    @Param('userId') userId: string,
-  ) {
-    try {
-      await this.moviesService.favoriteMovie(parseInt(userId), parseInt(movieId));
-      return { message: 'Filme favoritado com sucesso!' };
-    } catch (error) {
-      if (error instanceof NotFoundException || error instanceof ConflictException) {
-        throw error;
-      }
-      throw new Error('Erro interno ao favoritar filme.');
-    }
-  }
-
   @Get('favorites/:userId/:movieId')
   async isFavorite(
     @Param('userId') userId: string,
     @Param('movieId') movieId: string,
   ) {
-    const numericUserId = parseInt(userId, 10);
-    const numericMovieId = parseInt(movieId, 10);
-  
-    if (isNaN(numericUserId) || isNaN(numericMovieId)) {
-      throw new BadRequestException('userId and movieId must be valid numbers.');
-    }
   
     try {
-      const isFavorited = await this.moviesService.isFavorite(numericUserId, numericMovieId);
+      const isFavorited = await this.moviesService.isFavorite(Number(userId), Number(movieId));
       return { isFavorited };
     } catch (error) {
       console.error('Error in isFavorite:', error);
@@ -53,19 +32,12 @@ export class MoviesController {
     }
   }
 
+  @ApiProperty()
   @Post('favorites')
-  async toggleFavorite(
-    @Body() { userId, movieId }: { userId: string | number; movieId: string | number },
-  ) {
-    const numericUserId = typeof userId === 'string' ? parseInt(userId, 10) : userId;
-    const numericMovieId = typeof movieId === 'string' ? parseInt(movieId, 10) : movieId;
-  
-    if (isNaN(numericUserId) || isNaN(numericMovieId)) {
-      throw new BadRequestException('userId and movieId must be valid numbers.');
-    }
+  async toggleFavorite(@Body() { userId, movieId }: FavoriteMovieDto) {
   
     try {
-      const isFavorited = await this.moviesService.toggleFavorite(numericUserId, numericMovieId);
+      const isFavorited = await this.moviesService.toggleFavorite(Number(userId), Number(movieId));
       return {
         message: isFavorited
           ? 'Movie favorited successfully!'
