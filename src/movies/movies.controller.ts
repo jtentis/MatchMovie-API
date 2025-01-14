@@ -1,54 +1,11 @@
-import { Body, Controller, Get, InternalServerErrorException, Param, Post, Query } from '@nestjs/common';
-import { ApiParam, ApiProperty, ApiQuery, ApiTags } from "@nestjs/swagger";
-import { IsInt } from 'class-validator';
-import { FavoriteMovieDto } from './dto/favorite-movie.dto';
+import { Controller, Get, Param, Query } from '@nestjs/common';
+import { ApiParam, ApiQuery, ApiTags } from "@nestjs/swagger";
 import { MoviesService } from './movies.service';
-
-class ToggleFavoriteDto {
-  @IsInt()
-  userId: number;
-
-  @IsInt()
-  movieId: number;
-}
 
 @Controller('movies')
 @ApiTags('movies')
 export class MoviesController {
   constructor(private readonly moviesService: MoviesService) { }
-
-  @Get('favorites/:userId/:movieId')
-  async isFavorite(
-    @Param('userId') userId: string,
-    @Param('movieId') movieId: string,
-  ) {
-  
-    try {
-      const isFavorited = await this.moviesService.isFavorite(Number(userId), Number(movieId));
-      return { isFavorited };
-    } catch (error) {
-      console.error('Error in isFavorite:', error);
-      throw new InternalServerErrorException('Error checking favorite status.');
-    }
-  }
-
-  @ApiProperty()
-  @Post('favorites')
-  async toggleFavorite(@Body() { userId, movieId }: FavoriteMovieDto) {
-  
-    try {
-      const isFavorited = await this.moviesService.toggleFavorite(Number(userId), Number(movieId));
-      return {
-        message: isFavorited
-          ? 'Movie favorited successfully!'
-          : 'Movie unfavorited successfully!',
-      };
-    } catch (error) {
-      console.error('Error in toggleFavorite:', error);
-      throw new InternalServerErrorException('Error toggling favorite status.');
-    }
-  }
-  
 
   @Get('popular')
   @ApiQuery({

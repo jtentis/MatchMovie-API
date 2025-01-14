@@ -5,45 +5,55 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "postgresql"
-    url = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 //npx prisma migrate dev
 //create match table
 model User {
-  id            Int       @id @default(autoincrement())
-  name          String?
-  second_name   String?
-  user          String    @unique
-  email         String    @unique
-  password      String
-  cpf           String    @unique
-  location      String
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id          Int        @id @default(autoincrement())
+  name        String?
+  second_name String?
+  user        String     @unique
+  email       String     @unique
+  password    String
+  cpf         String     @unique
+  location    String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
   favorites   Favorite[]
-  groups        Group[]   @relation("GroupUsers")
+  watched     Watched[]
+  groups      Group[]    @relation("GroupUsers")
 }
 
 model Favorite {
-  id       Int    @id @default(autoincrement())
-  userId   Int
-  movieId  Int
-  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id      Int  @id @default(autoincrement())
+  userId  Int
+  movieId Int
+  user    User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, movieId]) // Garante que o mesmo filme não pode ser favoritado mais de uma vez por um usuário
 }
 
+model Watched {
+  id      Int  @id @default(autoincrement())
+  userId  Int
+  movieId Int
+  user    User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, movieId])
+}
+
 model Group {
-  id            Int       @id @default(autoincrement())
-  name          String
-  image         String?
-  users         User[]    @relation("GroupUsers")
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id        Int      @id @default(autoincrement())
+  name      String
+  image     String?
+  users     User[]   @relation("GroupUsers")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
