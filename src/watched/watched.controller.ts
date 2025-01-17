@@ -1,5 +1,6 @@
-import { Body, Controller, Get, InternalServerErrorException, NotFoundException, Param, Post } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, InternalServerErrorException, NotFoundException, Param, Post, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { WatchedMovieDto } from './dto/watched-movie-dto';
 import { WatchedService } from './watched.service';
 
@@ -9,6 +10,8 @@ export class WatchedController {
 
     constructor(private readonly watchedService: WatchedService) { }
 
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth()
     @Get('isWatched/:userId/:movieId')
     async isWatched(
         @Param('userId') userId: string,
@@ -24,6 +27,8 @@ export class WatchedController {
         }
     }
 
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth()
     @Post()
     async toggleWatched(@Body() { userId, movieId }: WatchedMovieDto) {
 
@@ -40,6 +45,8 @@ export class WatchedController {
         }
     }
 
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth()
     @Get('count/:userId')
     async getFavoriteCount(@Param('userId') userId: number) {
         const count = await this.watchedService.getUserWatched(Number(userId));

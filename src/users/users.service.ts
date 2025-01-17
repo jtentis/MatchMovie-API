@@ -30,9 +30,14 @@ export class UsersService {
   findOne(id: number) {
     return this.prisma.user.findUnique({
       where: { id },
-      include: {
-        favorites: {},
-        watched: {},
+      select: {
+        id: true,
+        name: true,
+        second_name: true,
+        user: true,
+        profilePicture: true,
+        favorites: true,
+        watched: true
       },
     });
   }

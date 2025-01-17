@@ -1,5 +1,6 @@
-import { Body, Controller, Get, InternalServerErrorException, NotFoundException, Param, Post } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, InternalServerErrorException, NotFoundException, Param, Post, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { FavoriteMovieDto } from './dto/favorite-movie.dto';
 import { FavoritesService } from './favorites.service';
 
@@ -7,7 +8,10 @@ import { FavoritesService } from './favorites.service';
 @ApiTags('favorites')
 export class FavoritesController {
     constructor(private readonly favoritesService: FavoritesService) { }
+
     @Get('isFavorite/:userId/:movieId')
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth()
     async isFavorite(
         @Param('userId') userId: string,
         @Param('movieId') movieId: string,
@@ -22,6 +26,8 @@ export class FavoritesController {
         }
     }
 
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth()
     @Post()
     async toggleFavorite(@Body() { userId, movieId }: FavoriteMovieDto) {
 
@@ -38,6 +44,8 @@ export class FavoritesController {
         }
     }
 
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth()
     @Get('count/:userId')
     async getFavoriteCount(@Param('userId') userId: number) {
         const count = await this.favoritesService.getUserFavorites(Number(userId));
