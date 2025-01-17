@@ -13,44 +13,6 @@ export class MoviesService {
 
   constructor(private prisma: PrismaService, private readonly httpService: HttpService) { }
 
-  async favoriteMovie(userId: number, movieId: number) {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-    });
-
-    if (!user) {
-      throw new Error('Usuário não encontrado');
-    }
-
-    return this.prisma.movie.update({
-      where: { id: movieId },
-      data: {
-        favoritedBy: {
-          connect: { id: userId },
-        },
-      },
-    });
-  }
-
-  async markAsWatched(userId: number, movieId: number) {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-    });
-
-    if (!user) {
-      throw new Error('Usuário não encontrado');
-    }
-
-    return this.prisma.movie.update({
-      where: { id: movieId },
-      data: {
-        watchedBy: {
-          connect: { id: userId },
-        },
-      },
-    });
-  }
-
   async getPopularMovies(page: number = 1): Promise<any> {
     const response$ = this.httpService.get(
       `${this.TMDB_API_URL}/movie/popular?language=pt-BR&region=BR&page=${page}`,

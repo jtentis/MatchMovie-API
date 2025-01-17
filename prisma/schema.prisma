@@ -5,49 +5,56 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "postgresql"
-    url = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 //npx prisma migrate dev
 //create match table
 model User {
-  id            Int       @id @default(autoincrement())
-  name          String?
-  second_name   String?
-  user          String    @unique
-  email         String    @unique
-  password      String
-  cpf           String    @unique
-  location      String
-  location_number   String
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  favoriteMovies Movie[]   @relation("FavoriteMovies")
-  watchedMovies  Movie[]   @relation("WatchedMovies")
-  groups        Group[]   @relation("GroupUsers")
+  id          Int        @id @default(autoincrement())
+  name        String?
+  second_name String?
+  user        String     @unique
+  email       String     @unique
+  password    String
+  cpf         String     @unique
+  location    String
+  profilePicture  String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  favorites   Favorite[]
+  watched     Watched[]
+  groups      Group[]    @relation("GroupUsers")
 }
 
-model Movie {
-  id          Int      @id @default(autoincrement())
-  title       String
-  description String?
-  releaseDate DateTime?
-  favoritedBy User[]   @relation("FavoriteMovies")
-  watchedBy   User[]   @relation("WatchedMovies")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model Favorite {
+  id      Int  @id @default(autoincrement())
+  userId  Int
+  movieId Int
+  user    User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, movieId]) // Garante que o mesmo filme não pode ser favoritado mais de uma vez por um usuário
+}
+
+model Watched {
+  id      Int  @id @default(autoincrement())
+  userId  Int
+  movieId Int
+  user    User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, movieId])
 }
 
 model Group {
-  id            Int       @id @default(autoincrement())
-  name          String
-  image         String?
-  users         User[]    @relation("GroupUsers")
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id        Int      @id @default(autoincrement())
+  name      String
+  image     String?
+  users     User[]   @relation("GroupUsers")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

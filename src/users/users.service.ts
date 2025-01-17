@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -8,7 +8,7 @@ export const roundsOfHashing = 10;
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async create(createUserDto: CreateUserDto) {
     const hashedPassword = await bcrypt.hash(
@@ -28,24 +28,51 @@ export class UsersService {
   }
 
   findOne(id: number) {
-    return this.prisma.user.findUnique({ where: { id } });
+    return this.prisma.user.findUnique({
+      where: { id },
+      include: {
+        favorites: {},
+        watched: {},
+      },
+    });
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
-    if (updateUserDto.password) {
-      updateUserDto.password = await bcrypt.hash(
-        updateUserDto.password,
-        roundsOfHashing,
-      );
+    const existingUser = await this.prisma.user.findUnique({
+      where: { id },
+    });
+  
+    if (!existingUser) {
+      throw new NotFoundException(`User with ID ${id} not found.`);
     }
-
+  
+    const updatedData = {
+      ...existingUser,
+      ...updateUserDto,
+    };
+  
     return this.prisma.user.update({
       where: { id },
-      data: updateUserDto,
+      data: updatedData,
+      include: {
+        favorites: true,
+        watched: true,
+      },
     });
   }
 
   remove(id: number) {
     return this.prisma.user.delete({ where: { id } });
   }
+
+  async updateProfilePicture(userId: number, profilePicture: string) {
+    if (!profilePicture) {
+        throw new UnauthorizedException('Escolha uma imagem.');
+    }
+
+    return this.prisma.user.update({
+        where: { id: userId },
+        data: { profilePicture },
+    });
+}
 }
