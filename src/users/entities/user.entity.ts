@@ -15,6 +15,9 @@ export class UserEntity implements User {
   createdAt: Date;
 
   @ApiProperty()
+  profilePicture: string;
+
+  @ApiProperty()
   updatedAt: Date;
 
   @ApiProperty()

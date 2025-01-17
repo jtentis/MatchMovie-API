@@ -72,4 +72,14 @@ export class UsersController {
   async remove(@Param('id', ParseIntPipe) id: number) {
     return new UserEntity(await this.usersService.remove(id));
   }
+
+  @Post(':id/upload-profile-picture')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+    async uploadProfilePicture(
+        @Param('id', ParseIntPipe) id: number,
+        @Body('profilePicture') profilePicture: string,
+    ) {
+        return this.usersService.updateProfilePicture(id, profilePicture);
+    }
 }

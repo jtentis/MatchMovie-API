@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -38,7 +38,6 @@ export class UsersService {
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
-    // Fetch the current user data
     const existingUser = await this.prisma.user.findUnique({
       where: { id },
     });
@@ -47,18 +46,11 @@ export class UsersService {
       throw new NotFoundException(`User with ID ${id} not found.`);
     }
   
-    // Merge the provided fields with the existing user data
     const updatedData = {
       ...existingUser,
       ...updateUserDto,
     };
   
-    // Handle password hashing if password is provided
-    if (updateUserDto.password) {
-      updatedData.password = await bcrypt.hash(updateUserDto.password, roundsOfHashing);
-    }
-  
-    // Update the user in the database
     return this.prisma.user.update({
       where: { id },
       data: updatedData,
@@ -72,4 +64,15 @@ export class UsersService {
   remove(id: number) {
     return this.prisma.user.delete({ where: { id } });
   }
+
+  async updateProfilePicture(userId: number, profilePicture: string) {
+    if (!profilePicture) {
+        throw new UnauthorizedException('Escolha uma imagem.');
+    }
+
+    return this.prisma.user.update({
+        where: { id: userId },
+        data: { profilePicture },
+    });
+}
 }
