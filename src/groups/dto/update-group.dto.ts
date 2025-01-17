@@ -6,4 +6,11 @@ export class UpdateGroupDto {
 
   @IsOptional()
   image?: string;
+
+  @IsOptional()
+  userIds?: number[];
+  
+  @IsOptional()
+  removeUserIds?: number[]; // Array of user IDs to remove from the group
 }
+

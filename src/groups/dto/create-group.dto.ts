@@ -8,5 +8,10 @@ export class CreateGroupDto {
 
   @IsOptional()
   @ApiProperty()
-  image: string;
+  image?: string;
+
+  @IsNotEmpty()
+  @ApiProperty()
+  userIds: number[]; // Array of user IDs to associate with the group
 }
+
