@@ -46,16 +46,16 @@ export class UsersService {
     const existingUser = await this.prisma.user.findUnique({
       where: { id },
     });
-  
+
     if (!existingUser) {
       throw new NotFoundException(`User with ID ${id} not found.`);
     }
-  
+
     const updatedData = {
       ...existingUser,
       ...updateUserDto,
     };
-  
+
     return this.prisma.user.update({
       where: { id },
       data: updatedData,
@@ -72,12 +72,31 @@ export class UsersService {
 
   async updateProfilePicture(userId: number, profilePicture: string) {
     if (!profilePicture) {
-        throw new UnauthorizedException('Escolha uma imagem.');
+      throw new UnauthorizedException('Escolha uma imagem.');
     }
 
     return this.prisma.user.update({
-        where: { id: userId },
-        data: { profilePicture },
+      where: { id: userId },
+      data: { profilePicture },
     });
-}
+  }
+
+  async listGroupsForUser(userId: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        groups: {
+          include: {
+            group: true, // Fetch details of the group
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user.groups.map((userGroup) => userGroup.group);
+  }
 }

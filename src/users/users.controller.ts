@@ -12,7 +12,7 @@ import {
   UsePipes,
   ValidationPipe
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -24,6 +24,7 @@ import { UsersService } from './users.service';
 @ApiTags('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
+  
 
   @Post()
   @ApiCreatedResponse({ type: UserEntity })
@@ -81,5 +82,13 @@ export class UsersController {
         @Body('profilePicture') profilePicture: string,
     ) {
         return this.usersService.updateProfilePicture(id, profilePicture);
+    }
+
+    @Get(':userId/groups')
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Liste os grupos do usuário'})
+    async listGroupsForUser(@Param('userId', ParseIntPipe) userId: number) {
+      return this.usersService.listGroupsForUser(userId);
     }
 }
