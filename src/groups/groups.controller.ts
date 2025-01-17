@@ -9,13 +9,14 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { UpdateGroupDto } from './dto/update-group.dto';
 import { GroupService } from './groups.service';
 
 @Controller('groups')
+@ApiTags('groups')
 export class GroupController {
   constructor(private readonly groupService: GroupService) { }
 
@@ -58,6 +59,7 @@ export class GroupController {
   @Post(':groupId/users/:userId')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
+  @ApiOperation({ summary: 'Adicione usuário no grupo'})
   async addUserToGroup(
     @Param('groupId', ParseIntPipe) groupId: number,
     @Param('userId', ParseIntPipe) userId: number,
@@ -68,7 +70,10 @@ export class GroupController {
   @Get(':groupId/users')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
+  @ApiOperation({ summary: 'Liste os usuários do grupo'})
   async listUsersInGroup(@Param('groupId', ParseIntPipe) groupId: number) {
     return this.groupService.listUsersInGroup(groupId);
   }
+
+
 }
