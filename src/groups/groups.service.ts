@@ -2,10 +2,11 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { UpdateGroupDto } from './dto/update-group.dto';
+import { GroupsGateway } from './groups.gateway';
 
 @Injectable()
 export class GroupService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService, private readonly groupsGateway: GroupsGateway,) { }
 
   async createGroup(createGroupDto: CreateGroupDto) {
     const { name, image, userIds } = createGroupDto;
@@ -192,6 +193,7 @@ export class GroupService {
       throw new Error('The user is already part of this group.');
     }
   
+    this.groupsGateway.notifyUserAddedToGroup(userId, groupId);
     // Create a new record
     return this.prisma.userGroup.create({
       data: {
