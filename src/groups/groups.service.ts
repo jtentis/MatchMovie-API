@@ -71,7 +71,20 @@ export class GroupService {
   async findOne(id: number) {
     const group = await this.prisma.group.findUnique({
       where: { id },
-      include: { users: true },
+      include: {
+        users: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                second_name: true,
+                user: true
+              }
+            }
+          },
+        },
+      },
     });
 
     if (!group) {
