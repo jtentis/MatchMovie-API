@@ -7,55 +7,62 @@ import { UpdateGroupDto } from './dto/update-group.dto';
 export class GroupService {
   constructor(private prisma: PrismaService) { }
 
-  async create(createGroupDto: CreateGroupDto) {
+  async createGroup(createGroupDto: CreateGroupDto) {
     const { name, image, userIds } = createGroupDto;
-
-    if (!userIds || userIds.length === 0) {
-        throw new Error("O grupo deve ter pelo menos 1 usuário!");
-    }
-
+  
+    // Validate user IDs
     const existingUsers = await this.prisma.user.findMany({
-        where: { id: { in: userIds } },
-        select: { id: true },
+      where: { id: { in: userIds } },
+      select: { id: true },
     });
-
+  
     const existingUserIds = existingUsers.map((user) => user.id);
     const invalidUserIds = userIds.filter((id) => !existingUserIds.includes(id));
-
+  
     if (invalidUserIds.length > 0) {
-        throw new Error(`IDs inválidos: ${invalidUserIds.join(", ")}`);
+      throw new Error(`Invalid user IDs: ${invalidUserIds.join(', ')}`);
     }
-
+  
+    // Create the group
     const group = await this.prisma.group.create({
-        data: {
-            name,
-            image,
-        },
+      data: { name, image },
     });
-
-    const userGroupPromises = existingUserIds.map((userId) =>
+  
+    // Link users to the group
+    await Promise.all(
+      existingUserIds.map((userId) =>
         this.prisma.userGroup.create({
-            data: {
-                userId,
-                groupId: group.id,
-            },
+          data: { userId, groupId: group.id },
         })
+      )
     );
-    await Promise.all(userGroupPromises);
-
+  
+    // Return the group with its users
     return this.prisma.group.findUnique({
-        where: { id: group.id },
-        include: {
-            users: true,
+      where: { id: group.id },
+      include: {
+        users: {
+          include: { user: true },
         },
+      },
     });
-}
-
+  }
 
   async findAll() {
     return this.prisma.group.findMany({
       include: {
-        users: true,
+        users: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                second_name: true,
+                user: true
+              }
+            }
+          }
+        }
       },
     });
   }
@@ -74,24 +81,76 @@ export class GroupService {
   }
 
   async update(id: number, updateGroupDto: UpdateGroupDto) {
-    const group = await this.prisma.group.findUnique({ where: { id } });
-
+    const group = await this.prisma.group.findUnique({
+      where: { id },
+    });
+  
     if (!group) {
       throw new NotFoundException('Group not found');
     }
-
+  
+    // Handle adding and removing users in separate steps
+    const addUserOperations = updateGroupDto.userIds?.map((userId) => ({
+      user: { connect: { id: userId } }, // Ensure the user exists
+    }));
+  
+    const removeUserOperations = updateGroupDto.removeUserIds?.map((userId) => ({
+      userId,
+      groupId: id,
+    }));
+  
+    // Add users to the group
+    if (addUserOperations?.length) {
+      await Promise.all(
+        addUserOperations.map((data) =>
+          this.prisma.userGroup.create({
+            data: {
+              userId: data.user.connect.id,
+              groupId: id,
+            },
+          })
+        )
+      );
+    }
+  
+    // Remove users from the group
+    if (removeUserOperations?.length) {
+      await Promise.all(
+        removeUserOperations.map((data) =>
+          this.prisma.userGroup.deleteMany({
+            where: {
+              userId: data.userId,
+              groupId: data.groupId,
+            },
+          })
+        )
+      );
+    }
+  
+    // Update group details (e.g., name, image)
     return this.prisma.group.update({
       where: { id },
       data: {
         name: updateGroupDto.name,
         image: updateGroupDto.image,
+      },
+      include: {
         users: {
-          connect: updateGroupDto.userIds?.map((id) => ({ id })),
-          disconnect: updateGroupDto.removeUserIds?.map((id) => ({ id })),
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                second_name: true,
+                user: true
+              }
+            }
+          },
         },
       },
     });
   }
+  
 
   async remove(id: number) {
     const group = await this.prisma.group.findUnique({ where: { id } });
@@ -104,27 +163,43 @@ export class GroupService {
   }
 
   async addUserToGroup(groupId: number, userId: number) {
-    const group = await this.prisma.group.findUnique({
-        where: { id: groupId },
-    });
-    if (!group) {
-        throw new NotFoundException('Group not found');
-    }
-
+    // Check if the user exists
     const user = await this.prisma.user.findUnique({
-        where: { id: userId },
+      where: { id: userId },
     });
+  
     if (!user) {
-        throw new NotFoundException('User not found');
+      throw new Error(`User with ID ${userId} does not exist.`);
     }
-
-    return this.prisma.userGroup.create({
-        data: {
-            userId,
-            groupId,
-        },
+  
+    // Check if the group exists
+    const group = await this.prisma.group.findUnique({
+      where: { id: groupId },
     });
-}
+  
+    if (!group) {
+      throw new Error(`Group with ID ${groupId} does not exist.`);
+    }
+  
+    // Check if the user is already part of the group
+    const existingRecord = await this.prisma.userGroup.findUnique({
+      where: {
+        userId_groupId: { userId, groupId }, // Composite key lookup
+      },
+    });
+  
+    if (existingRecord) {
+      throw new Error('The user is already part of this group.');
+    }
+  
+    // Create a new record
+    return this.prisma.userGroup.create({
+      data: {
+        userId,
+        groupId,
+      },
+    });
+  }
 
   async listUsersInGroup(groupId: number) {
     const group = await this.prisma.group.findUnique({

@@ -24,7 +24,7 @@ export class GroupController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   create(@Body() createGroupDto: CreateGroupDto) {
-    return this.groupService.create(createGroupDto);
+    return this.groupService.createGroup(createGroupDto);
   }
 
   @Get()

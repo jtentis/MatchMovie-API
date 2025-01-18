@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsInt, IsNotEmpty, IsOptional } from 'class-validator';
+import { IsNotEmpty, IsOptional } from 'class-validator';
 
 export class CreateGroupDto {
   @IsNotEmpty()
@@ -12,7 +12,6 @@ export class CreateGroupDto {
 
   @IsNotEmpty()
   @ApiProperty()
-  @IsInt()
   userIds: number[];
 }
 
