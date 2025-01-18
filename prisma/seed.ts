@@ -8,16 +8,16 @@ const roundsOfHashing = 10;
 
 async function main() {
 
-  const eduardo = await bcrypt.hash('007oterrordosmlk', roundsOfHashing);
-  const joao = await bcrypt.hash('joao69', roundsOfHashing);
+  const eduardo = await bcrypt.hash('senha123', roundsOfHashing);
+  const joao = await bcrypt.hash('senha123', roundsOfHashing);
 
   const user1 = await prisma.user.upsert({
-    where: { email: 'doandradejr@gmail.com' },
+    where: { email: 'eduardo@gmail.com' },
     update: {
       password: eduardo
     },
     create: {
-      email: 'doandradejr@gmail.com',
+      email: 'eduardo@gmail.com',
       name: 'Eduardo',
       second_name: 'Torres',
       user: 'duds',
@@ -63,9 +63,50 @@ async function main() {
       users: {
         create: [
           { user: { connect: { id: user1.id } } },
+          { user: { connect: { id: user2.id } } },
         ],
       },
     },
+  });
+
+  const group3 = await prisma.group.create({
+    data: {
+      name: 'Grupo familia',
+      image: null,
+      users: {
+        create: [
+          { user: { connect: { id: user1.id } } },
+        ],
+      },
+    },
+  });
+
+  const group4 = await prisma.group.create({
+    data: {
+      name: 'Grupo faculdade',
+      image: null,
+      users: {
+        create: [
+          { user: { connect: { id: user2.id } } },
+        ],
+      },
+    },
+  });
+
+  const markAsFavorite = await this.prisma.favorite.create({
+    data: { id: user2.id, movieId: 240 },
+  });
+
+  const markAsFavorite2 = await this.prisma.favorite.create({
+    data: { id: user1.id, movieId: 240 },
+  });
+
+  const markAsWatched = await this.prisma.watched.create({
+    data: { id: user1.id, movieId: 240 },
+  });
+
+  const markAsWatched2 = await this.prisma.watched.create({
+    data: { id: user2.id, movieId: 240 },
   });
 
   console.log({ user1, user2, group1, group2 });
