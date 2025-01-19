@@ -17,5 +17,9 @@ export class UpdateGroupDto {
   @IsOptional()
   @ApiProperty({ description:'Array para remover usuarios'})
   removeUserIds?: number[]; // Array of user IDs to remove from the group
+
+  @IsOptional()
+  @ApiProperty({ description: 'ID do filme de referencia do grupo' })
+  movieId?: number;
 }
 

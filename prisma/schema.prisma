@@ -54,6 +54,7 @@ model Group {
   id        Int      @id @default(autoincrement())
   name      String
   image     String?
+  movieId   Int?
   users     UserGroup[]  // Many-to-many relationship via UserGroup
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
