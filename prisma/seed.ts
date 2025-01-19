@@ -93,22 +93,6 @@ async function main() {
     },
   });
 
-  const markAsFavorite = await this.prisma.favorite.create({
-    data: { id: user2.id, movieId: 240 },
-  });
-
-  const markAsFavorite2 = await this.prisma.favorite.create({
-    data: { id: user1.id, movieId: 240 },
-  });
-
-  const markAsWatched = await this.prisma.watched.create({
-    data: { id: user1.id, movieId: 240 },
-  });
-
-  const markAsWatched2 = await this.prisma.watched.create({
-    data: { id: user2.id, movieId: 240 },
-  });
-
   console.log({ user1, user2, group1, group2 });
 }
 
