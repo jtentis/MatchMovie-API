@@ -17,13 +17,20 @@ export class GroupsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     handleConnection(client: Socket) {
         console.log(`Client connected: ${client.id}`);
-      
+
         client.on('joinRoom', (room: string) => {
-          console.log(`Client ${client.id} joined room: ${room}`);
-          client.join(room); // Join the exact room name sent by the client
+            console.log(`Received joinRoom for room: ${room}`);
+            if (!room.startsWith('user_')) {
+                console.error(`Invalid room name: ${room}`);
+                client.emit('error', { message: 'Invalid room name.' });
+                return;
+            }
+
+            console.log(`Client ${client.id} joined room: ${room}`);
+            client.join(room); // Join the exact room name sent by the client
         });
-      }
-      
+    }
+
 
     handleDisconnect(client: Socket) {
         console.log(`Client disconnected: ${client.id}`);
@@ -36,4 +43,18 @@ export class GroupsGateway implements OnGatewayConnection, OnGatewayDisconnect {
             message: `You have been added to group ${groupId}.`,
         });
     }
+
+    notifyGroupTest(userId: number) {
+        this.server.to(`user_${userId}`).emit('groupUpdated', {
+            groupId: 123,
+            message: 'Test group update',
+        });
+    }
+
+    notifyGroupUpdated(userId: number) {
+        this.server.to(`user_${userId}`).emit('groupUpdated', {
+            message: `The group has been updated.`,
+        });
+    }
+
 }
