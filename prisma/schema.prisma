@@ -29,7 +29,7 @@ model User {
   updatedAt   DateTime   @updatedAt
   favorites   Favorite[]
   watched     Watched[]
-  groups      Group[]    @relation("GroupUsers")
+  groups         UserGroup[] // Many-to-many relationship via UserGroup
 }
 
 model Favorite {
@@ -54,7 +54,17 @@ model Group {
   id        Int      @id @default(autoincrement())
   name      String
   image     String?
-  users     User[]   @relation("GroupUsers")
+  users     UserGroup[]  // Many-to-many relationship via UserGroup
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model UserGroup {
+  id      Int   @id @default(autoincrement())
+  userId  Int
+  groupId Int
+  user    User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group   Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, groupId]) // Ensures unique pairs of user and group
 }

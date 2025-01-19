@@ -12,9 +12,9 @@ import {
   UsePipes,
   ValidationPipe
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateUserDto, FindUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserEntity } from './entities/user.entity';
 import { UsersService } from './users.service';
@@ -24,6 +24,7 @@ import { UsersService } from './users.service';
 @ApiTags('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
+  
 
   @Post()
   @ApiCreatedResponse({ type: UserEntity })
@@ -49,7 +50,17 @@ export class UsersController {
   @ApiBearerAuth()
   @ApiOkResponse({ type: UserEntity })
   async findOne(@Param('id', ParseIntPipe) id: number) {
+    console.log('asdasdasdasdasd', id);
     return new UserEntity(await this.usersService.findOne(id));
+  }
+
+  @Get('username/:username')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  async findOneByUser(@Param() findUserDto : FindUserDto) {
+    const {username} = findUserDto;
+    console.log('Received username parameter:', findUserDto); // Log the parameter
+    return new UserEntity(await this.usersService.findOneByUser(username));
   }
 
   @Patch(':id')
@@ -81,5 +92,13 @@ export class UsersController {
         @Body('profilePicture') profilePicture: string,
     ) {
         return this.usersService.updateProfilePicture(id, profilePicture);
+    }
+
+    @Get(':userId/groups')
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Liste os grupos do usuário'})
+    async listGroupsForUser(@Param('userId', ParseIntPipe) userId: number) {
+      return this.usersService.listGroupsForUser(userId);
     }
 }

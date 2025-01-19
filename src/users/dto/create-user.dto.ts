@@ -41,3 +41,10 @@ export class CreateUserDto {
   @ApiProperty()
   location: string;
 }
+
+export class FindUserDto {
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty()
+  username: string;
+}
