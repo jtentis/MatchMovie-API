@@ -11,14 +11,24 @@ export class GroupService {
   async createGroup(createGroupDto: CreateGroupDto) {
     const { name, image, userIds } = createGroupDto;
 
+    if (!name) {
+      throw new Error('Group name is required.');
+    }
+
+    if (!userIds || userIds.length === 0) {
+      throw new Error('At least one user ID is required to create a group.');
+    }
+
+    const parsedUserIds = userIds.map((id) => Number(id));
+
     // Validate user IDs
     const existingUsers = await this.prisma.user.findMany({
-      where: { id: { in: userIds } },
+      where: { id: { in: parsedUserIds } },
       select: { id: true },
     });
 
     const existingUserIds = existingUsers.map((user) => user.id);
-    const invalidUserIds = userIds.filter((id) => !existingUserIds.includes(id));
+    const invalidUserIds = parsedUserIds.filter((id) => !existingUserIds.includes(id));
 
     if (invalidUserIds.length > 0) {
       throw new Error(`Invalid user IDs: ${invalidUserIds.join(', ')}`);
@@ -26,20 +36,19 @@ export class GroupService {
 
     // Create the group
     const group = await this.prisma.group.create({
-      data: { name, image },
+      data: { name, image: image || null },
     });
 
     // Link users to the group
-    await Promise.all(
-      existingUserIds.map((userId) =>
-        this.prisma.userGroup.create({
-          data: { userId, groupId: group.id },
-        })
-      )
-    );
+    await this.prisma.userGroup.createMany({
+      data: existingUserIds.map((userId) => ({
+        userId,
+        groupId: group.id,
+      })),
+    });
 
-    // Return the group with its users
-    return this.prisma.group.findUnique({
+    // Find the complete group data
+    const fullGroup = await this.prisma.group.findUnique({
       where: { id: group.id },
       include: {
         users: {
@@ -47,7 +56,13 @@ export class GroupService {
         },
       },
     });
+
+    // Notify users via WebSocket
+    this.groupsGateway.notifyGroupCreated(fullGroup, existingUserIds);
+
+    return fullGroup;
   }
+
 
   async findAll() {
     return this.prisma.group.findMany({

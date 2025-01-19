@@ -57,4 +57,10 @@ export class GroupsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         });
     }
 
+    notifyGroupCreated(group: any, userIds: number[]) {
+        userIds.forEach((userId) => {
+            this.server.to(`user_${userId}`).emit('groupCreated', group);
+        });
+    }
+
 }
