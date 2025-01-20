@@ -95,4 +95,10 @@ export class MoviesController {
     const movies = await this.moviesService.getMoviePoster(moviePoster);
     return movies;
   }
+
+  @Get('ingressoURL')
+  async getIngressoUrl() {
+    const movies = await this.moviesService.getIngressoUrl();
+    return movies;
+  }
 }

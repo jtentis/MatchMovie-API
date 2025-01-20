@@ -81,9 +81,9 @@ export class MatchService {
             // Emit the winner to all clients
             const winnerMovie = await this.fetchMovieDetails(Number(consensusMovieId));
             this.groupsGateway.notifyWinner(groupId, winnerMovie);
+            await this.checkForMatch(groupId);
             return { winner: winnerMovie };
         }
-
         return { winner: null };
     }
 
@@ -117,5 +117,65 @@ export class MatchService {
         this.groupsGateway.sendRecommendations(groupId, data.results);
         // console.log(data.results)
         return data.results;
+    }
+
+    async checkForMatch(groupId: number): Promise<void> {
+        const groupMembersCount = await this.prisma.userGroup.count({
+            where: { groupId },
+        });
+
+        const votes = await this.prisma.vote.groupBy({
+            by: ['movieId'],
+            where: {
+                groupId,
+                liked: true,
+            },
+            _count: {
+                movieId: true,
+            },
+        });
+
+        const winningVote = votes.find(vote => vote._count.movieId === groupMembersCount);
+
+        if (winningVote) {
+            // Check if a match already exists for this group and movie
+            const existingMatch = await this.prisma.match.findFirst({
+                where: {
+                    groupId,
+                    movieId: winningVote.movieId,
+                },
+            });
+
+            if (!existingMatch) {
+                // Get movie details (e.g., title)
+                const movieDetails = await this.fetchMovieDetails(winningVote.movieId); // Implement this function to fetch movie details
+
+                // Create a new match
+                await this.prisma.match.create({
+                    data: {
+                        groupId,
+                        movieId: winningVote.movieId,
+                        winnerTitle: movieDetails.title, // Assume title is returned from movieDetails
+                    },
+                });
+            }
+        }
+    }
+
+    async getMatchHistory(groupId: number): Promise<any> {
+        const matches = await this.prisma.match.findMany({
+            where: { groupId },
+            orderBy: { createdAt: 'desc' },
+        });
+
+        return matches;
+    }
+
+    async deleteMatch(id: number): Promise<boolean> {
+        const match = await this.prisma.match.findUnique({ where: { id } });
+        if (!match) return false;
+
+        await this.prisma.match.delete({ where: { id } });
+        return true;
     }
 }

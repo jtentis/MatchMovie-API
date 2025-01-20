@@ -1,11 +1,11 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { MatchService } from './match.service';
 
 @ApiTags('match')
 @Controller('match')
 export class MatchController {
-  constructor(private matchService: MatchService) {}
+  constructor(private matchService: MatchService) { }
 
   @Post(':groupId/start/:movieId')
   async startMatch(
@@ -28,5 +28,24 @@ export class MatchController {
   @Get(':groupId/recommendations')
   async getRecommendations(@Param('groupId') groupId: number) {
     return this.matchService.getRecommendations(Number(groupId));
+  }
+
+  @Post(':groupId/check')
+  async checkForMatch(@Param('groupId') groupId: number) {
+    return this.matchService.checkForMatch(Number(groupId));
+  }
+
+  @Get(':groupId/history')
+  async getMatchHistory(@Param('groupId') groupId: number) {
+    return this.matchService.getMatchHistory(Number(groupId));
+  }
+
+  @Delete(':id')
+  async deleteMatch(@Param('id') id: number) {
+    const deleted = await this.matchService.deleteMatch(Number(id));
+    if (!deleted) {
+      throw new HttpException('Match not found', HttpStatus.NOT_FOUND);
+    }
+    return { message: 'Match deleted successfully' };
   }
 }
