@@ -9,7 +9,7 @@ export class GroupService {
   constructor(private prisma: PrismaService, private readonly groupsGateway: GroupsGateway,) { }
 
   async createGroup(createGroupDto: CreateGroupDto) {
-    const { name, image, userIds } = createGroupDto;
+    const { name, image, userIds, movieId } = createGroupDto;
 
     if (!name) {
       throw new Error('Group name is required.');
@@ -36,7 +36,7 @@ export class GroupService {
 
     // Create the group
     const group = await this.prisma.group.create({
-      data: { name, image: image || null },
+      data: { name, image: image || null, movieId: movieId || null },
     });
 
     // Link users to the group
@@ -162,6 +162,7 @@ export class GroupService {
       data: {
         name: updateGroupDto.name,
         image: updateGroupDto.image,
+        movieId: updateGroupDto.movieId,
       },
       include: {
         users: {

@@ -15,5 +15,9 @@ export class CreateGroupDto {
   @IsNotEmpty()
   @ApiProperty()
   userIds: number[];
+
+  @IsOptional()
+  @ApiProperty({description: 'ID do filme de referencia do grupo'})
+  movieId?: number;
 }
 

@@ -27,6 +27,7 @@ model User {
   profilePicture  String?
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
+  votes       Vote[]
   favorites   Favorite[]
   watched     Watched[]
   groups         UserGroup[] // Many-to-many relationship via UserGroup
@@ -54,6 +55,9 @@ model Group {
   id        Int      @id @default(autoincrement())
   name      String
   image     String?
+  movieId   Int?
+  votes     Vote[]
+  matches   Match[]      // Relation to Match model
   users     UserGroup[]  // Many-to-many relationship via UserGroup
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -67,4 +71,29 @@ model UserGroup {
   group   Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
 
   @@unique([userId, groupId]) // Ensures unique pairs of user and group
+}
+
+model Vote {
+  id       Int    @id @default(autoincrement())
+  userId   Int
+  groupId  Int
+  movieId  Int
+  liked     Boolean? @default(false) // Allow null temporarily
+
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group    Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, groupId]) // Composite key to ensure a user can only vote once per group
+}
+
+model Match {
+  id          Int      @id @default(autoincrement())
+  groupId     Int
+  movieId     Int      // Winning movie's ID
+  winnerTitle String   // Title of the winning movie
+  status      String   @default("completed") // "completed" by default
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  group       Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
 }

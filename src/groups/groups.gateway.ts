@@ -29,6 +29,12 @@ export class GroupsGateway implements OnGatewayConnection, OnGatewayDisconnect {
             console.log(`Client ${client.id} joined room: ${room}`);
             client.join(room); // Join the exact room name sent by the client
         });
+
+        client.on('joinGroupRoom', (groupId: number) => {
+            const room = `group_${groupId}`;
+            console.log(`Client ${client.id} joined group room: ${room}`);
+            client.join(room);
+        });
     }
 
 
@@ -52,6 +58,7 @@ export class GroupsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     notifyGroupUpdated(userId: number) {
+        console.log('Emitting groupUpdated event for user', userId);
         this.server.to(`user_${userId}`).emit('groupUpdated', {
             message: `The group has been updated.`,
         });
@@ -63,4 +70,44 @@ export class GroupsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         });
     }
 
+    startMatch(groupId: number, movieId: number) {
+        this.server.to(`group_${groupId}`).emit('matchStarted', { groupId, movieId });
+    }
+
+    sendRecommendations(groupId: number, recommendations: any) {
+        this.server.to(`group_${groupId}`).emit('movieRecommendations', recommendations);
+    }
+
+    notifyWinner(groupId: number, winnerMovie: any): void {
+        console.log(`Broadcasting winner for group ${groupId}:`, winnerMovie); // Add this log to debug
+        this.server.to(`group_${groupId}`).emit('gameWinner', {
+            movieId: winnerMovie.movieId,
+            title: winnerMovie.title,
+            overview: winnerMovie.overview,
+            poster_path: winnerMovie.poster_path,
+            message: `The winning movie is ${winnerMovie.title}!`,
+        });
+    }
+
+    sendVoteUpdate(groupId: number, votes: any) {
+        this.server.to(`group_${groupId}`).emit('voteUpdate', votes);
+    }
+
+    joinGroupRoom(client: Socket, groupId: number) {
+        const room = `group_${groupId}`;
+        console.log(`Client ${client.id} joined room: ${room}`);
+        client.join(room);
+    }
+
+    leaveGroupRoom(client: Socket, groupId: number) {
+        const room = `group_${groupId}`;
+        console.log(`Client ${client.id} left room: ${room}`);
+        client.leave(room);
+    }
+
+    notifyGroupRoom(groupId: number, event: string, data: any) {
+        const room = `group_${groupId}`;
+        console.log(`Notifying room: ${room} with event: ${event}`);
+        this.server.to(room).emit(event, data);
+    }
 }

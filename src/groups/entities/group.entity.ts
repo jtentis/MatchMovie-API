@@ -19,6 +19,9 @@ export class GroupEntity implements Group {
   
     @ApiProperty()
     users: any[];
+
+    @ApiProperty()
+    movieId: number;
   
     @ApiProperty()
     createdAt: Date;
