@@ -1,3 +1,0 @@
--- AlterTable
-ALTER TABLE "Vote" ALTER COLUMN "liked" DROP NOT NULL,
-ALTER COLUMN "liked" SET DEFAULT false;
