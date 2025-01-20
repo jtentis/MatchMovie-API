@@ -79,9 +79,12 @@ export class GroupsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     notifyWinner(groupId: number, winnerMovie: any): void {
-        console.log(`Broadcasting winner for group ${groupId}`);
+        console.log(`Broadcasting winner for group ${groupId}:`, winnerMovie); // Add this log to debug
         this.server.to(`group_${groupId}`).emit('gameWinner', {
             movieId: winnerMovie.movieId,
+            title: winnerMovie.title,
+            overview: winnerMovie.overview,
+            poster_path: winnerMovie.poster_path,
             message: `The winning movie is ${winnerMovie.title}!`,
         });
     }
