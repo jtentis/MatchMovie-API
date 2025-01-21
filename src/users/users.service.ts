@@ -102,7 +102,7 @@ export class UsersService {
       include: {
         groups: {
           include: {
-            group: true, // Fetch details of the group
+            group: true,
           },
         },
       },

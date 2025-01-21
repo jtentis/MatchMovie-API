@@ -30,7 +30,7 @@ model User {
   votes       Vote[]
   favorites   Favorite[]
   watched     Watched[]
-  groups         UserGroup[] // Many-to-many relationship via UserGroup
+  groups         UserGroup[]
 }
 
 model Favorite {
@@ -39,7 +39,7 @@ model Favorite {
   movieId Int
   user    User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, movieId]) // Garante que o mesmo filme não pode ser favoritado mais de uma vez por um usuário
+  @@unique([userId, movieId])
 }
 
 model Watched {
@@ -57,8 +57,8 @@ model Group {
   image     String?
   movieId   Int?
   votes     Vote[]
-  matches   Match[]      // Relation to Match model
-  users     UserGroup[]  // Many-to-many relationship via UserGroup
+  matches   Match[]
+  users     UserGroup[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -70,7 +70,7 @@ model UserGroup {
   user    User  @relation(fields: [userId], references: [id], onDelete: Cascade)
   group   Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, groupId]) // Ensures unique pairs of user and group
+  @@unique([userId, groupId])
 }
 
 model Vote {
@@ -78,19 +78,19 @@ model Vote {
   userId   Int
   groupId  Int
   movieId  Int
-  liked     Boolean? @default(false) // Allow null temporarily
+  liked     Boolean? @default(false)
 
   user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   group    Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, groupId]) // Composite key to ensure a user can only vote once per group
+  @@unique([userId, groupId])
 }
 
 model Match {
   id          Int      @id @default(autoincrement())
   groupId     Int
-  movieId     Int      // Winning movie's ID
-  winnerTitle String   // Title of the winning movie
+  movieId     Int
+  winnerTitle String
   status      String   @default("completed") // "completed" by default
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

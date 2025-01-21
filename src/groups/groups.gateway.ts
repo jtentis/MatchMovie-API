@@ -27,7 +27,7 @@ export class GroupsGateway implements OnGatewayConnection, OnGatewayDisconnect {
             }
 
             console.log(`Client ${client.id} joined room: ${room}`);
-            client.join(room); // Join the exact room name sent by the client
+            client.join(room);
         });
 
         client.on('joinGroupRoom', (groupId: number) => {
@@ -42,7 +42,6 @@ export class GroupsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         console.log(`Client disconnected: ${client.id}`);
     }
 
-    // Method to notify the user of group addition
     notifyUserAddedToGroup(userId: number, groupId: number) {
         this.server.to(`user_${userId}`).emit('groupUpdated', {
             groupId,
@@ -79,7 +78,7 @@ export class GroupsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     notifyWinner(groupId: number, winnerMovie: any): void {
-        console.log(`Broadcasting winner for group ${groupId}:`, winnerMovie); // Add this log to debug
+        console.log(`Broadcasting winner for group ${groupId}:`, winnerMovie);
         this.server.to(`group_${groupId}`).emit('gameWinner', {
             movieId: winnerMovie.movieId,
             title: winnerMovie.title,
