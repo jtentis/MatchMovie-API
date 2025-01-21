@@ -4,8 +4,8 @@ WORKDIR /usr/src
 
 COPY package*.json ./
 
-RUN npm install && \
-    npm install -g @nestjs/cli
+RUN npm install -g npm@11.0.0 && \
+    npm install
 
 COPY . .
 
