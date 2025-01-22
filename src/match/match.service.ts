@@ -132,25 +132,16 @@ export class MatchService {
         const winningVote = votes.find(vote => vote._count.movieId === groupMembersCount);
 
         if (winningVote) {
-            const existingMatch = await this.prisma.match.findFirst({
-                where: {
+            const movieDetails = await this.fetchMovieDetails(winningVote.movieId); // Fetch movie details
+    
+            // Create a new match even if the same movie was matched before
+            await this.prisma.match.create({
+                data: {
                     groupId,
                     movieId: winningVote.movieId,
+                    winnerTitle: movieDetails.title,
                 },
             });
-
-            if (!existingMatch) {
-                const movieDetails = await this.fetchMovieDetails(winningVote.movieId); // pegar detalhes de filmes
-
-                // Create a new match
-                await this.prisma.match.create({
-                    data: {
-                        groupId,
-                        movieId: winningVote.movieId,
-                        winnerTitle: movieDetails.title,
-                    },
-                });
-            }
         }
     }
 
