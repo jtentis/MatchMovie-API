@@ -40,7 +40,15 @@ export class GroupsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     handleDisconnect(client: Socket) {
         console.log(`Client disconnected: ${client.id}`);
+        const rooms = Array.from(client.rooms);
+        rooms.forEach((room) => {
+            if (room !== client.id) { // Ensure it's not the default room (client's own room)
+                client.leave(room);
+                console.log(`Client ${client.id} left room: ${room}`);
+            }
+        });
     }
+    
 
     notifyUserAddedToGroup(userId: number, groupId: number) {
         this.server.to(`user_${userId}`).emit('groupUpdated', {
@@ -96,15 +104,15 @@ export class GroupsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     joinGroupRoom(client: Socket, groupId: number) {
         const room = `group_${groupId}`;
-        console.log(`Client ${client.id} joined room: ${room}`);
+        console.log(`Client ${client.id} attempting to join room: ${room}`);
         client.join(room);
     }
-
+    
     leaveGroupRoom(client: Socket, groupId: number) {
         const room = `group_${groupId}`;
-        console.log(`Client ${client.id} left room: ${room}`);
+        console.log(`Client ${client.id} attempting to leave room: ${room}`);
         client.leave(room);
-    }
+    }    
 
     notifyGroupRoom(groupId: number, event: string, data: any) {
         const room = `group_${groupId}`;
