@@ -59,7 +59,7 @@ export class GroupController {
   @Post(':groupId/users/:userId')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Adicione usuário no grupo'})
+  @ApiOperation({ summary: 'Adicione usuário no grupo' })
   async addUserToGroup(
     @Param('groupId', ParseIntPipe) groupId: number,
     @Param('userId', ParseIntPipe) userId: number,
@@ -67,16 +67,29 @@ export class GroupController {
     return this.groupService.addUserToGroup(groupId, userId);
   }
 
+  @Delete(':groupId/users/:userId')
+  // @UseGuards(JwtAuthGuard)
+  // @ApiBearerAuth()
+  @ApiOperation({ summary: 'Remova usuário do grupo' })
+  async removeUserFromGroup(
+    @Param('groupId', ParseIntPipe) groupId: number,
+    @Param('userId', ParseIntPipe) userId: number,
+  ) {
+    return this.groupService.removeUserFromGroup(groupId, userId);
+  }
+
   @Get(':groupId/users')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Liste os usuários do grupo'})
+  @ApiOperation({ summary: 'Liste os usuários do grupo' })
   async listUsersInGroup(@Param('groupId', ParseIntPipe) groupId: number) {
     return this.groupService.listUsersInGroup(groupId);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @Get(':id/midpoint')
-  @ApiOperation({ summary: 'Calcular ponto médio de latitude entre usuários'})
+  @ApiOperation({ summary: 'Calcular ponto médio de latitude entre usuários' })
   async getGroupMidpoint(@Param('id') groupId: number): Promise<any> {
     const midpoint = await this.groupService.calculateMidpoint(Number(groupId));
     return { message: 'Midpoint calculated successfully', midpoint };

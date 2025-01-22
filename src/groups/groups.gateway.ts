@@ -49,17 +49,19 @@ export class GroupsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         });
     }
 
-    notifyGroupTest(userId: number) {
-        this.server.to(`user_${userId}`).emit('groupUpdated', {
-            groupId: 123,
-            message: 'Test group update',
-        });
-    }
-
     notifyGroupUpdated(userId: number) {
         console.log('Emitting groupUpdated event for user', userId);
         this.server.to(`user_${userId}`).emit('groupUpdated', {
             message: `The group has been updated.`,
+        });
+    }
+
+    notifyUsersGroupDeleted(userIds: number[], groupId: number) {
+        userIds.forEach((userId) => {
+            this.server.to(`user_${userId}`).emit('groupDeleted', {
+                groupId,
+                message: `The group has been deleted.`,
+            });
         });
     }
 

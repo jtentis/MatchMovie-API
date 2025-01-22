@@ -185,13 +185,18 @@ export class GroupService {
 
 
   async remove(id: number) {
-    const group = await this.prisma.group.findUnique({ where: { id } });
+    const group = await this.prisma.group.findUnique({ where: { id }, include: { users: true } });
 
     if (!group) {
-      throw new NotFoundException('Group not found');
+      throw new NotFoundException("Group not found");
     }
 
-    return this.prisma.group.delete({ where: { id } });
+    const deleteGroup = await this.prisma.group.delete({ where: { id } });
+
+    const userIds = group.users.map((user) => user.userId);
+    this.groupsGateway.notifyUsersGroupDeleted(userIds, id);
+    // this.groupsGateway.notifyGroupDeleted(id, `O grupo "${group.name}" foi excluído.`);
+    return deleteGroup;
   }
 
   async addUserToGroup(groupId: number, userId: number) {
@@ -230,6 +235,41 @@ export class GroupService {
     });
   }
 
+  async removeUserFromGroup(groupId: number, userId: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new Error(`User with ID ${userId} does not exist.`);
+    }
+
+    const group = await this.prisma.group.findUnique({
+      where: { id: groupId },
+    });
+
+    if (!group) {
+      throw new Error(`Group with ID ${groupId} does not exist.`);
+    }
+
+    const existingRecord = await this.prisma.userGroup.findUnique({
+      where: {
+        userId_groupId: { userId, groupId },
+      },
+    });
+
+    if (!existingRecord) {
+      throw new Error('O usuário não faz parte deste grupo.');
+    }
+
+    this.groupsGateway.notifyUserAddedToGroup(userId, groupId);
+    return this.prisma.userGroup.delete({
+      where: {
+        userId_groupId: { userId, groupId },
+      },
+    });
+  }
+
   async listUsersInGroup(groupId: number) {
     const group = await this.prisma.group.findUnique({
       where: { id: groupId },
@@ -258,20 +298,20 @@ export class GroupService {
 
   async getCoordinatesByCEP(cep: string): Promise<{ lat: number; lng: number } | null> {
     const apiUrl = `https://api.opencagedata.com/geocode/v1/json?q=${cep},Brazil&key=${this.OPENCAGE_API_KEY}`;
-  
+
     try {
       const response = await firstValueFrom(this.httpService.get(apiUrl));
       const data = response.data;
-  
+
       if (data.results.length > 0) {
         const location = data.results[0].geometry;
-  
+
         // Check for invalid fallback coordinates
         if (location.lat === -10 && location.lng === -55) {
           console.warn(`Fallback coordinates returned for CEP ${cep}.`);
           return null;
         }
-  
+
         return { lat: location.lat, lng: location.lng };
       } else {
         console.error(`No results found for the CEP: ${cep}`);
@@ -301,32 +341,32 @@ export class GroupService {
         },
       },
     });
-  
+
     if (!group || group.users.length === 0) {
       throw new NotFoundException('Group not found or has no users.');
     }
-  
+
     const userPool = [...group.users];
-  
+
     while (userPool.length > 0) {
       // Select a random user
       const randomIndex = Math.floor(Math.random() * userPool.length);
       const randomUser = userPool.splice(randomIndex, 1)[0].user;
-  
+
       if (!randomUser.location) {
         console.warn(`User with ID ${randomUser.id} does not have a valid CEP.`);
         continue;
       }
-  
+
       const coordinates = await this.getCoordinatesByCEP(randomUser.location);
-  
+
       if (coordinates) {
         return coordinates;
       }
-  
+
       console.warn(`Invalid coordinates returned for user ID ${randomUser.id} with CEP ${randomUser.location}.`);
     }
-  
+
     throw new Error('No valid coordinates could be resolved for the group.');
   }
 }
