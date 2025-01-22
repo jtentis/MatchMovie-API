@@ -75,5 +75,10 @@ export class GroupController {
     return this.groupService.listUsersInGroup(groupId);
   }
 
-
+  @Get(':id/midpoint')
+  @ApiOperation({ summary: 'Calcular ponto médio de latitude entre usuários'})
+  async getGroupMidpoint(@Param('id') groupId: number): Promise<any> {
+    const midpoint = await this.groupService.calculateMidpoint(Number(groupId));
+    return { message: 'Midpoint calculated successfully', midpoint };
+  }
 }

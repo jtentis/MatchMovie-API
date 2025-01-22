@@ -131,9 +131,17 @@ export class MoviesService {
     return src;
   }
 
-  async getIngressoUrl(): Promise<any> {
+  async getIngressoUrl(cityId: number): Promise<any> {
     const response$ = this.httpService.get(
-      `https://api-content.ingresso.com/v0/templates/nowplaying/2?partnership=3213asd12eqsdad`
+      `https://api-content.ingresso.com/v0/templates/highlights/${cityId}/partnership/joaotentis?justEvents=true`
+    );
+    const response = await lastValueFrom(response$);
+    return response.data;
+  }
+
+  async getIngressoLatLng(lat: any, lng: any): Promise<any> {
+    const response$ = this.httpService.get(
+      `https://api-content.ingresso.com/v0/states/city/latlong?lat=${lat}&lng=${lng}&radiusInKilometers=50&resultCount=1`
     );
     const response = await lastValueFrom(response$);
     return response.data;
