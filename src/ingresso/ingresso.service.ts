@@ -9,7 +9,7 @@ export class IngressoService {
 
     async getIngressoUrl(cityId: number): Promise<any> {
         const response$ = this.httpService.get(
-            `https://api-content.ingresso.com/v0/templates/highlights/${cityId}/partnership/joaotentis?justEvents=true`
+            `https://api-content.ingresso.com/v0/templates/nowplaying/${cityId}/partnership/joaotentis?limit=150`
         );
         const response = await lastValueFrom(response$);
         return response.data;
