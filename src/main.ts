@@ -14,7 +14,15 @@ async function bootstrap() {
 
   const config = new DocumentBuilder()
     .setTitle('Match Movie')
-    // .setDescription('The Match Movie API description')
+    .addTag('auth')
+    .addTag('users')
+    .addTag('groups')
+    .addTag('movies')
+    .addTag('favorites')
+    .addTag('watched')
+    .addTag('geolocation')
+    .addTag('ingresso')
+    .addTag('match')
     .setVersion('0.1')
     .addBearerAuth()
     .build();

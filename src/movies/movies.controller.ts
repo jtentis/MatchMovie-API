@@ -1,5 +1,5 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
-import { ApiOperation, ApiParam, ApiQuery, ApiTags } from "@nestjs/swagger";
+import { ApiParam, ApiQuery, ApiTags } from "@nestjs/swagger";
 import { MoviesService } from './movies.service';
 
 @Controller('movies')
@@ -93,35 +93,6 @@ export class MoviesController {
   })
   async getMoviePoster(@Param('moviePoster') moviePoster: string) {
     const movies = await this.moviesService.getMoviePoster(moviePoster);
-    return movies;
-  }
-
-  @Get('ingressoURL/city/:cityId')
-  @ApiOperation({ summary: 'Pegar a url do cinema mais proximo para redirecionamento.'})
-  @ApiParam({
-    name: 'cityId',
-    required: true,
-    type: Number,
-  })
-  async getIngressoUrl(@Param('cityId') cityId: number) {
-    const movies = await this.moviesService.getIngressoUrl(Number(cityId));
-    return movies;
-  }
-
-  @Get('ingressoURL/lat/:lat/lng/:lng')
-  @ApiOperation({ summary: 'Listar o cinema mais proximo baseado na latitude e longitude média dos usuários do grupo'})
-  @ApiParam({
-    name: 'lat',
-    required: true,
-    type: Number,
-  })
-  @ApiParam({
-    name: 'lng',
-    required: true,
-    type: Number,
-  })
-  async getIngressoLatLng(@Param('lat') lat: number, @Param('lng') lng: number) {
-    const movies = await this.moviesService.getIngressoLatLng(Number(lat), Number(lng));
     return movies;
   }
 }
