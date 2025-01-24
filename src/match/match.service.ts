@@ -77,8 +77,8 @@ export class MatchService {
             // emitir ganhador para todos o grupo
             const winnerMovie = await this.fetchMovieDetails(Number(consensusMovieId));
             this.groupsGateway.notifyWinner(groupId, winnerMovie);
-            await this.prisma.vote.deleteMany({ where: { groupId } }); // deletando tabela quando o match é finalizado para impedir de dar match logo quando iniciar outro.
             await this.checkForMatch(groupId);                         // TODO: consertar para quando o usuário parar o match no meio
+            await this.prisma.vote.deleteMany({ where: { groupId } }); // deletando tabela quando o match é finalizado para impedir de dar match logo quando iniciar outro.
             return { winner: winnerMovie };
         }
         return { winner: null };
