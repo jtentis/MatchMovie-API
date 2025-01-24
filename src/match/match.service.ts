@@ -40,24 +40,20 @@ export class MatchService {
             throw new NotFoundException('Group not found');
         }
 
-        // Emit match start event to all group members
         this.groupsGateway.startMatch(groupId, movieId);
 
         return { message: `Match started for group ${groupId} with movie ${movieId}.` };
     }
 
     async vote(groupId: number, userId: number, movieId: number, liked: boolean) {
-        // Save vote using the composite key
         await this.prisma.vote.upsert({
-            where: { userId_groupId: { userId, groupId } }, // Use composite key
-            update: { movieId, liked }, // Update if the vote already exists
-            create: { userId, groupId, movieId, liked }, // Create new vote if it doesn't exist
+            where: { userId_groupId: { userId, groupId } },
+            update: { movieId, liked },
+            create: { userId, groupId, movieId, liked },
         });
 
-        // Fetch all votes for the group
         const votes = await this.prisma.vote.findMany({ where: { groupId } });
 
-        // Fetch group users
         const group = await this.prisma.group.findUnique({
             where: { id: groupId },
             include: { users: true },
@@ -65,7 +61,7 @@ export class MatchService {
 
         const groupUserIds = group.users.map((user) => user.userId);
 
-        // Determine if all users have liked the same movie
+        // ver se todos usuarios dera like no mesmo filme
         const likedMovies = votes
             .filter((vote) => vote.liked)
             .reduce((acc, vote) => {
@@ -78,10 +74,11 @@ export class MatchService {
         );
 
         if (consensusMovieId) {
-            // Emit the winner to all clients
+            // emitir ganhador para todos o grupo
             const winnerMovie = await this.fetchMovieDetails(Number(consensusMovieId));
             this.groupsGateway.notifyWinner(groupId, winnerMovie);
-            await this.checkForMatch(groupId);
+            await this.checkForMatch(groupId);                         // TODO: consertar para quando o usuário parar o match no meio
+            await this.prisma.vote.deleteMany({ where: { groupId } }); // deletando tabela quando o match é finalizado para impedir de dar match logo quando iniciar outro.
             return { winner: winnerMovie };
         }
         return { winner: null };
@@ -98,7 +95,6 @@ export class MatchService {
             throw new NotFoundException('Group or base movie not found');
         }
 
-        // Fetch movie recommendations from The Movie Database API
         const response = await fetch(
             `${this.TMDB_API_URL}/movie/${group.movieId}/recommendations?language=pt-BR&api_key=${this.TMDB_API_KEY}`
         );
@@ -113,7 +109,6 @@ export class MatchService {
             throw new Error('Invalid recommendations data from TMDB');
         }
 
-        // Send recommendations to all group members
         this.groupsGateway.sendRecommendations(groupId, data.results);
         // console.log(data.results)
         return data.results;
@@ -138,27 +133,16 @@ export class MatchService {
         const winningVote = votes.find(vote => vote._count.movieId === groupMembersCount);
 
         if (winningVote) {
-            // Check if a match already exists for this group and movie
-            const existingMatch = await this.prisma.match.findFirst({
-                where: {
+            const movieDetails = await this.fetchMovieDetails(winningVote.movieId); // Fetch movie details
+    
+            // Create a new match even if the same movie was matched before
+            await this.prisma.match.create({
+                data: {
                     groupId,
                     movieId: winningVote.movieId,
+                    winnerTitle: movieDetails.title,
                 },
             });
-
-            if (!existingMatch) {
-                // Get movie details (e.g., title)
-                const movieDetails = await this.fetchMovieDetails(winningVote.movieId); // Implement this function to fetch movie details
-
-                // Create a new match
-                await this.prisma.match.create({
-                    data: {
-                        groupId,
-                        movieId: winningVote.movieId,
-                        winnerTitle: movieDetails.title, // Assume title is returned from movieDetails
-                    },
-                });
-            }
         }
     }
 

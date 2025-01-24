@@ -27,7 +27,7 @@ export class GroupsGateway implements OnGatewayConnection, OnGatewayDisconnect {
             }
 
             console.log(`Client ${client.id} joined room: ${room}`);
-            client.join(room); // Join the exact room name sent by the client
+            client.join(room);
         });
 
         client.on('joinGroupRoom', (groupId: number) => {
@@ -40,9 +40,16 @@ export class GroupsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     handleDisconnect(client: Socket) {
         console.log(`Client disconnected: ${client.id}`);
+        const rooms = Array.from(client.rooms);
+        rooms.forEach((room) => {
+            if (room !== client.id) { // Ensure it's not the default room (client's own room)
+                client.leave(room);
+                console.log(`Client ${client.id} left room: ${room}`);
+            }
+        });
     }
+    
 
-    // Method to notify the user of group addition
     notifyUserAddedToGroup(userId: number, groupId: number) {
         this.server.to(`user_${userId}`).emit('groupUpdated', {
             groupId,
@@ -50,17 +57,19 @@ export class GroupsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         });
     }
 
-    notifyGroupTest(userId: number) {
-        this.server.to(`user_${userId}`).emit('groupUpdated', {
-            groupId: 123,
-            message: 'Test group update',
-        });
-    }
-
     notifyGroupUpdated(userId: number) {
         console.log('Emitting groupUpdated event for user', userId);
         this.server.to(`user_${userId}`).emit('groupUpdated', {
             message: `The group has been updated.`,
+        });
+    }
+
+    notifyUsersGroupDeleted(userIds: number[], groupId: number) {
+        userIds.forEach((userId) => {
+            this.server.to(`user_${userId}`).emit('groupDeleted', {
+                groupId,
+                message: `The group has been deleted.`,
+            });
         });
     }
 
@@ -79,7 +88,7 @@ export class GroupsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     notifyWinner(groupId: number, winnerMovie: any): void {
-        console.log(`Broadcasting winner for group ${groupId}:`, winnerMovie); // Add this log to debug
+        console.log(`Broadcasting winner for group ${groupId}:`, winnerMovie);
         this.server.to(`group_${groupId}`).emit('gameWinner', {
             movieId: winnerMovie.movieId,
             title: winnerMovie.title,
@@ -95,15 +104,15 @@ export class GroupsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     joinGroupRoom(client: Socket, groupId: number) {
         const room = `group_${groupId}`;
-        console.log(`Client ${client.id} joined room: ${room}`);
+        console.log(`Client ${client.id} attempting to join room: ${room}`);
         client.join(room);
     }
-
+    
     leaveGroupRoom(client: Socket, groupId: number) {
         const room = `group_${groupId}`;
-        console.log(`Client ${client.id} left room: ${room}`);
+        console.log(`Client ${client.id} attempting to leave room: ${room}`);
         client.leave(room);
-    }
+    }    
 
     notifyGroupRoom(groupId: number, event: string, data: any) {
         const room = `group_${groupId}`;

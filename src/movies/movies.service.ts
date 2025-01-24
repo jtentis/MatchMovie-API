@@ -130,12 +130,4 @@ export class MoviesService {
     const src = `${base64Image}`;
     return src;
   }
-
-  async getIngressoUrl(): Promise<any> {
-    const response$ = this.httpService.get(
-      `https://api-content.ingresso.com/v0/templates/nowplaying/2?partnership=3213asd12eqsdad`
-    );
-    const response = await lastValueFrom(response$);
-    return response.data;
-  }
 }

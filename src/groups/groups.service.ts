@@ -1,3 +1,4 @@
+import { HttpService } from '@nestjs/axios';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateGroupDto } from './dto/create-group.dto';
@@ -6,7 +7,8 @@ import { GroupsGateway } from './groups.gateway';
 
 @Injectable()
 export class GroupService {
-  constructor(private prisma: PrismaService, private readonly groupsGateway: GroupsGateway,) { }
+  private readonly OPENCAGE_API_KEY = process.env.OPENCAGE_API_KEY;
+  constructor(private prisma: PrismaService, private readonly groupsGateway: GroupsGateway, private readonly httpService: HttpService) { }
 
   async createGroup(createGroupDto: CreateGroupDto) {
     const { name, image, userIds, movieId } = createGroupDto;
@@ -21,7 +23,7 @@ export class GroupService {
 
     const parsedUserIds = userIds.map((id) => Number(id));
 
-    // Validate user IDs
+    // validar ids de usuario
     const existingUsers = await this.prisma.user.findMany({
       where: { id: { in: parsedUserIds } },
       select: { id: true },
@@ -34,12 +36,10 @@ export class GroupService {
       throw new Error(`Invalid user IDs: ${invalidUserIds.join(', ')}`);
     }
 
-    // Create the group
     const group = await this.prisma.group.create({
       data: { name, image: image || null, movieId: movieId || null },
     });
 
-    // Link users to the group
     await this.prisma.userGroup.createMany({
       data: existingUserIds.map((userId) => ({
         userId,
@@ -47,7 +47,6 @@ export class GroupService {
       })),
     });
 
-    // Find the complete group data
     const fullGroup = await this.prisma.group.findUnique({
       where: { id: group.id },
       include: {
@@ -57,7 +56,6 @@ export class GroupService {
       },
     });
 
-    // Notify users via WebSocket
     this.groupsGateway.notifyGroupCreated(fullGroup, existingUserIds);
 
     return fullGroup;
@@ -94,7 +92,8 @@ export class GroupService {
                 id: true,
                 name: true,
                 second_name: true,
-                user: true
+                user: true,
+                location: true,
               }
             }
           },
@@ -118,7 +117,6 @@ export class GroupService {
       throw new NotFoundException('Group not found');
     }
 
-    // Handle adding users to the group
     if (updateGroupDto.userIds?.length) {
       await Promise.all(
         updateGroupDto.userIds.map((userId) =>
@@ -131,13 +129,11 @@ export class GroupService {
         )
       );
 
-      // Notify clients that users were added to the group
       updateGroupDto.userIds.forEach((userId) => {
         this.groupsGateway.notifyUserAddedToGroup(userId, id);
       });
     }
 
-    // Handle removing users from the group
     if (updateGroupDto.removeUserIds?.length) {
       await Promise.all(
         updateGroupDto.removeUserIds.map((userId) =>
@@ -150,13 +146,11 @@ export class GroupService {
         )
       );
 
-      // Notify clients that users were removed from the group
       updateGroupDto.removeUserIds.forEach((userId) => {
         this.groupsGateway.notifyGroupUpdated(userId);
       });
     }
 
-    // Update group details
     const updatedGroup = await this.prisma.group.update({
       where: { id },
       data: {
@@ -180,7 +174,6 @@ export class GroupService {
       },
     });
 
-    // Notify all users in the group about the update
     updatedGroup.users.forEach(({ userId }) => {
       this.groupsGateway.notifyGroupUpdated(userId);
     });
@@ -191,17 +184,21 @@ export class GroupService {
 
 
   async remove(id: number) {
-    const group = await this.prisma.group.findUnique({ where: { id } });
+    const group = await this.prisma.group.findUnique({ where: { id }, include: { users: true } });
 
     if (!group) {
-      throw new NotFoundException('Group not found');
+      throw new NotFoundException("Group not found");
     }
 
-    return this.prisma.group.delete({ where: { id } });
+    const deleteGroup = await this.prisma.group.delete({ where: { id } });
+
+    const userIds = group.users.map((user) => user.userId);
+    this.groupsGateway.notifyUsersGroupDeleted(userIds, id);
+    // this.groupsGateway.notifyGroupDeleted(id, `O grupo "${group.name}" foi excluído.`);
+    return deleteGroup;
   }
 
   async addUserToGroup(groupId: number, userId: number) {
-    // Check if the user exists
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
     });
@@ -210,7 +207,6 @@ export class GroupService {
       throw new Error(`User with ID ${userId} does not exist.`);
     }
 
-    // Check if the group exists
     const group = await this.prisma.group.findUnique({
       where: { id: groupId },
     });
@@ -219,10 +215,9 @@ export class GroupService {
       throw new Error(`Group with ID ${groupId} does not exist.`);
     }
 
-    // Check if the user is already part of the group
     const existingRecord = await this.prisma.userGroup.findUnique({
       where: {
-        userId_groupId: { userId, groupId }, // Composite key lookup
+        userId_groupId: { userId, groupId },
       },
     });
 
@@ -231,11 +226,45 @@ export class GroupService {
     }
 
     this.groupsGateway.notifyUserAddedToGroup(userId, groupId);
-    // Create a new record
     return this.prisma.userGroup.create({
       data: {
         userId,
         groupId,
+      },
+    });
+  }
+
+  async removeUserFromGroup(groupId: number, userId: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new Error(`User with ID ${userId} does not exist.`);
+    }
+
+    const group = await this.prisma.group.findUnique({
+      where: { id: groupId },
+    });
+
+    if (!group) {
+      throw new Error(`Group with ID ${groupId} does not exist.`);
+    }
+
+    const existingRecord = await this.prisma.userGroup.findUnique({
+      where: {
+        userId_groupId: { userId, groupId },
+      },
+    });
+
+    if (!existingRecord) {
+      throw new Error('O usuário não faz parte deste grupo.');
+    }
+
+    this.groupsGateway.notifyUserAddedToGroup(userId, groupId);
+    return this.prisma.userGroup.delete({
+      where: {
+        userId_groupId: { userId, groupId },
       },
     });
   }
