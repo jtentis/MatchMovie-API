@@ -197,11 +197,11 @@ A API está documentada com Swagger e pode ser acessada pelo seguinte endpoint:
 2. **Configure as variáveis de ambiente**:
 
 ```env
-DB_USER = ''
-DB_PASSWORD = ''
-DB_NAME=''
+DB_USER = 'postgres'
+DB_PASSWORD = 'postgres'
+DB_NAME='postgres'
 
-DATABASE_URL = 'postgresql://${DB_USER}:${DB_PASSWORD}@localhost:5432/${DB_NAME}'
+DATABASE_URL = 'postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}'
 
 TMDB_API_KEY=''
 
