@@ -1,4 +1,5 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -11,16 +12,36 @@ export class UsersService {
   constructor(private prisma: PrismaService) { }
 
   async create(createUserDto: CreateUserDto) {
-    const hashedPassword = await bcrypt.hash(
-      createUserDto.password,
-      roundsOfHashing,
-    );
+    try {
+      const hashedPassword = await bcrypt.hash(
+        createUserDto.password,
+        roundsOfHashing,
+      );
 
-    createUserDto.password = hashedPassword;
+      createUserDto.password = hashedPassword;
 
-    return this.prisma.user.create({
-      data: createUserDto,
-    });
+      return await this.prisma.user.create({
+        data: createUserDto,
+      });
+    } catch (error) {
+      if (error instanceof PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          const target = error.meta?.target as string[] | undefined;
+
+          switch (target?.[0]) {
+            case "cpf":
+              throw new BadRequestException("Este CPF já existe!");
+            case "email":
+              throw new BadRequestException("Este email já existe!");
+            case "user":
+              throw new BadRequestException("Este nome de usuário já existe!");
+            default:
+              throw new BadRequestException("Unique constraint failed");
+          }
+        }
+      }
+      throw new InternalServerErrorException("Something went wrong");
+    }
   }
 
   findAll() {
@@ -51,9 +72,9 @@ export class UsersService {
       },
     });
 
-    if(!user)
+    if (!user)
       throw new NotFoundException(`Usuário ${username} não encontrado.`);
-    
+
     return user;
   }
 
