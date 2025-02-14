@@ -47,8 +47,10 @@ export class MatchService {
 
     async vote(groupId: number, userId: number, movieId: number, liked: boolean) {
         await this.prisma.vote.upsert({
-            where: { userId_groupId: { userId, groupId } },
-            update: { movieId, liked },
+            where: { 
+                userId_groupId_movieId: { userId, groupId, movieId } // Prisma will NOT recognize this by default
+            }, 
+            update: { liked },
             create: { userId, groupId, movieId, liked },
         });
 

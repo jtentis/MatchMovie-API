@@ -83,7 +83,7 @@ model Vote {
   user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   group    Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, groupId])
+  @@unique([userId, groupId, movieId])
 }
 
 model Match {
