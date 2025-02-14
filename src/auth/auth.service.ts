@@ -68,7 +68,7 @@ export class AuthService {
 
     const resetToken = this.jwtService.sign(
       { userId: user.id },
-      { secret: this.configService.get<string>('JWT_SECRET'), expiresIn: '1h' }
+      { secret: this.configService.get<string>('JWT_SECRET'), expiresIn: '10m' }
     );
 
     const resetLink = `myapp://reset-password?token=${resetToken}`;
@@ -104,9 +104,9 @@ export class AuthService {
         data: { password: hashedPassword },
       });
 
-      return { message: 'Password updated successfully!' };
+      return { message: 'Senha atualizada com sucesso!' };
     } catch (error) {
-      throw new BadRequestException('Invalid or expired token.');
+      throw new BadRequestException('Token inválido!');
     }
   }
 }
