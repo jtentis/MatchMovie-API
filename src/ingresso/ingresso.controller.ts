@@ -1,5 +1,6 @@
-import { Controller, Get, Param } from '@nestjs/common';
-import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { IngressoService } from './ingresso.service';
 
 @Controller('ingresso')
@@ -8,6 +9,8 @@ export class IngressoController {
     constructor(private readonly ingressoService : IngressoService) { }
 
     @Get('city/:cityId')
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth()
     @ApiOperation({ summary: 'Pegar a url do cinema mais proximo para redirecionamento.' })
     @ApiParam({
         name: 'cityId',
@@ -20,6 +23,8 @@ export class IngressoController {
     }
 
     @Get('lat/:lat/lng/:lng')
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth()
     @ApiOperation({ summary: 'Listar o cinema mais proximo baseado na latitude e longitude média dos usuários do grupo' })
     @ApiParam({
         name: 'lat',

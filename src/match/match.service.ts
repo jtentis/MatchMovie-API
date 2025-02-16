@@ -135,9 +135,8 @@ export class MatchService {
         const winningVote = votes.find(vote => vote._count.movieId === groupMembersCount);
 
         if (winningVote) {
-            const movieDetails = await this.fetchMovieDetails(winningVote.movieId); // Fetch movie details
+            const movieDetails = await this.fetchMovieDetails(winningVote.movieId);
     
-            // Create a new match even if the same movie was matched before
             await this.prisma.match.create({
                 data: {
                     groupId,

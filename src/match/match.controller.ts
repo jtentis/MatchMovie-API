@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Post, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { MatchService } from './match.service';
 
@@ -8,6 +8,7 @@ import { MatchService } from './match.service';
 export class MatchController {
   constructor(private matchService: MatchService) { }
 
+  @ApiOperation({ summary: 'Começar match de grupo'})
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @Post(':groupId/start/:movieId')
@@ -18,6 +19,7 @@ export class MatchController {
     return this.matchService.startMatch(groupId, movieId);
   }
 
+  @ApiOperation({ summary: 'Receber votos de grupo'})
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @Post(':groupId/vote')
@@ -30,6 +32,7 @@ export class MatchController {
     return this.matchService.vote(Number(groupId), Number(userId), Number(movieId), Boolean(liked));
   }
 
+  @ApiOperation({ summary: 'Listar filmes recomendados baseado em filme do grupo'})
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @Get(':groupId/recommendations')
@@ -37,6 +40,7 @@ export class MatchController {
     return this.matchService.getRecommendations(Number(groupId));
   }
 
+  @ApiOperation({ summary: 'Checar match do grupo'})
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @Post(':groupId/check')
@@ -44,6 +48,7 @@ export class MatchController {
     return this.matchService.checkForMatch(Number(groupId));
   }
 
+  @ApiOperation({ summary: 'Checar historico de match do grupo'})
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @Get(':groupId/history')
@@ -51,6 +56,7 @@ export class MatchController {
     return this.matchService.getMatchHistory(Number(groupId));
   }
 
+  @ApiOperation({ summary: 'Deletar match do grupo'})
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @Delete(':id')

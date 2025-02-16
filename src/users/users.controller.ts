@@ -28,6 +28,7 @@ export class UsersController {
 
   @Post()
   @ApiCreatedResponse({ type: UserEntity })
+  @ApiOperation({ summary: 'Criar usuário'})
   @UsePipes(new ValidationPipe({ 
     transform: true, // automatically transform payload to DTO
     exceptionFactory: (errors) => new BadRequestException(errors), // customize error handling
@@ -39,6 +40,7 @@ export class UsersController {
   @Get()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
+  @ApiOperation({ summary: 'Listar usuários'})
   @ApiOkResponse({ type: UserEntity, isArray: true })
   async findAll() {
     const users = await this.usersService.findAll();
@@ -48,6 +50,7 @@ export class UsersController {
   @Get(':id')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
+  @ApiOperation({ summary: 'Listar usuário'})
   @ApiOkResponse({ type: UserEntity })
   async findOne(@Param('id', ParseIntPipe) id: number) {
     return new UserEntity(await this.usersService.findOne(id));
@@ -56,6 +59,7 @@ export class UsersController {
   @Get('username/:username')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
+  @ApiOperation({ summary: 'Procurar usuário por username'})
   async findOneByUser(@Param() findUserDto : FindUserDto) {
     const {username} = findUserDto;
     console.log('Received username parameter:', findUserDto); // Log the parameter
@@ -65,6 +69,7 @@ export class UsersController {
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
+  @ApiOperation({ summary: 'Atualizar usuário'})
   @ApiCreatedResponse({ type: UserEntity })
   async update(
     @Param('id', ParseIntPipe) id: number,
@@ -78,6 +83,7 @@ export class UsersController {
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
+  @ApiOperation({ summary: 'Excluir usuário'})
   @ApiOkResponse({ type: UserEntity })
   async remove(@Param('id', ParseIntPipe) id: number) {
     return new UserEntity(await this.usersService.remove(id));
@@ -86,6 +92,7 @@ export class UsersController {
   @Post(':id/upload-profile-picture')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
+  @ApiOperation({ summary: 'Adicionar foto de perfil para usuário'})
     async uploadProfilePicture(
         @Param('id', ParseIntPipe) id: number,
         @Body('profilePicture') profilePicture: string,
@@ -96,7 +103,7 @@ export class UsersController {
     @Get(':userId/groups')
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth()
-    @ApiOperation({ summary: 'Liste os grupos do usuário'})
+    @ApiOperation({ summary: 'Listar os grupos do usuário'})
     async listGroupsForUser(@Param('userId', ParseIntPipe) userId: number) {
       return this.usersService.listGroupsForUser(userId);
     }

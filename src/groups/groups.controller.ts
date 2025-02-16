@@ -21,6 +21,7 @@ export class GroupController {
   constructor(private readonly groupService: GroupService) { }
 
   @Post()
+  @ApiOperation({ summary: 'Criar um grupo'})
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   create(@Body() createGroupDto: CreateGroupDto) {
@@ -28,11 +29,15 @@ export class GroupController {
   }
 
   @Get()
+  @ApiOperation({ summary: 'Listar grupos'})
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   findAll() {
     return this.groupService.findAll();
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Listar um grupo'})
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   findOne(@Param('id', ParseIntPipe) id: number) {
@@ -40,6 +45,7 @@ export class GroupController {
   }
 
   @Patch(':id')
+  @ApiOperation({ summary: 'Atualizar um grupo'})
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   update(
@@ -50,6 +56,7 @@ export class GroupController {
   }
 
   @Delete(':id')
+  @ApiOperation({ summary: 'Deletar um grupo'})
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   remove(@Param('id', ParseIntPipe) id: number) {
