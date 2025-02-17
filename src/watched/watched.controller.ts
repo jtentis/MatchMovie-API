@@ -1,5 +1,5 @@
 import { Body, Controller, Get, InternalServerErrorException, NotFoundException, Param, Post, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { WatchedMovieDto } from './dto/watched-movie-dto';
 import { WatchedService } from './watched.service';
@@ -12,6 +12,7 @@ export class WatchedController {
 
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth()
+    @ApiOperation({ summary: 'Verificar se filme já foi marcado como assistido ou não'})
     @Get('isWatched/:userId/:movieId')
     async isWatched(
         @Param('userId') userId: string,
@@ -29,6 +30,7 @@ export class WatchedController {
 
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth()
+    @ApiOperation({ summary: 'Marcar filme como assistido'})
     @Post()
     async toggleWatched(@Body() { userId, movieId }: WatchedMovieDto) {
 
@@ -47,6 +49,7 @@ export class WatchedController {
 
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth()
+    @ApiOperation({ summary: 'Contar quantidade de assistidos do usuário'})
     @Get('count/:userId')
     async getFavoriteCount(@Param('userId') userId: number) {
         const count = await this.watchedService.getUserWatched(Number(userId));

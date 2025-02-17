@@ -1,5 +1,5 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
-import { ApiParam, ApiQuery, ApiTags } from "@nestjs/swagger";
+import { ApiOperation, ApiParam, ApiQuery, ApiTags } from "@nestjs/swagger";
 import { MoviesService } from './movies.service';
 
 @Controller('movies')
@@ -8,6 +8,7 @@ export class MoviesController {
   constructor(private readonly moviesService: MoviesService) { }
 
   @Get('popular')
+  @ApiOperation({ summary: 'Listar filmes populares'})
   @ApiQuery({
     name: 'page',
     required: false,
@@ -20,6 +21,7 @@ export class MoviesController {
 
 
   @Get('top_rated')
+  @ApiOperation({ summary: 'Listar filmes melhor avaliados'})
   @ApiQuery({
     name: 'page',
     required: false,
@@ -31,6 +33,7 @@ export class MoviesController {
   }
 
   @Get('now_playing')
+  @ApiOperation({ summary: 'Listar filmes em cartaz'})
   @ApiQuery({
     name: 'page',
     required: false,
@@ -42,6 +45,7 @@ export class MoviesController {
   }
 
   @Get('upcoming')
+  @ApiOperation({ summary: 'Listar filmes em breve'})
   @ApiQuery({
     name: 'page',
     required: false,
@@ -53,6 +57,7 @@ export class MoviesController {
   }
 
   @Get('search')
+  @ApiOperation({ summary: 'Listar filmes por nome'})
   @ApiQuery({
     name: 'page',
     required: false,
@@ -64,6 +69,7 @@ export class MoviesController {
   }
 
   @Get(':movieId/details')
+  @ApiOperation({ summary: 'Listar detalhes do filme'})
   @ApiParam({
     name: 'movieId',
     required: true,
@@ -75,6 +81,7 @@ export class MoviesController {
   }
 
   @Get(':movieId/watch_providers')
+  @ApiOperation({ summary: 'Listar streaming disponiveis do filme'})
   @ApiParam({
     name: 'movieId',
     required: true,
@@ -86,6 +93,7 @@ export class MoviesController {
   }
 
   @Get(':moviePoster/poster')
+  @ApiOperation({ summary: 'Listar poster do filme'})
   @ApiParam({
     name: 'moviePoster',
     required: true,
