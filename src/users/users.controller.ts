@@ -50,7 +50,6 @@ export class UsersController {
   @ApiBearerAuth()
   @ApiOkResponse({ type: UserEntity })
   async findOne(@Param('id', ParseIntPipe) id: number) {
-    console.log('asdasdasdasdasd', id);
     return new UserEntity(await this.usersService.findOne(id));
   }
 

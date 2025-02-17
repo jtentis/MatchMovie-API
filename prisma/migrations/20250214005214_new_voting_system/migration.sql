@@ -70,8 +70,8 @@ CREATE TABLE "Match" (
     "id" SERIAL NOT NULL,
     "groupId" INTEGER NOT NULL,
     "movieId" INTEGER NOT NULL,
-    "winnerId" INTEGER,
-    "status" TEXT NOT NULL DEFAULT 'active',
+    "winnerTitle" TEXT NOT NULL,
+    "status" TEXT NOT NULL DEFAULT 'completed',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -97,7 +97,7 @@ CREATE UNIQUE INDEX "Watched_userId_movieId_key" ON "Watched"("userId", "movieId
 CREATE UNIQUE INDEX "UserGroup_userId_groupId_key" ON "UserGroup"("userId", "groupId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Vote_userId_groupId_key" ON "Vote"("userId", "groupId");
+CREATE UNIQUE INDEX "Vote_userId_groupId_movieId_key" ON "Vote"("userId", "groupId", "movieId");
 
 -- AddForeignKey
 ALTER TABLE "Favorite" ADD CONSTRAINT "Favorite_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -116,3 +116,6 @@ ALTER TABLE "Vote" ADD CONSTRAINT "Vote_userId_fkey" FOREIGN KEY ("userId") REFE
 
 -- AddForeignKey
 ALTER TABLE "Vote" ADD CONSTRAINT "Vote_groupId_fkey" FOREIGN KEY ("groupId") REFERENCES "Group"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Match" ADD CONSTRAINT "Match_groupId_fkey" FOREIGN KEY ("groupId") REFERENCES "Group"("id") ON DELETE CASCADE ON UPDATE CASCADE;

@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { PrismaModule } from 'src/prisma/prisma.module';
@@ -11,6 +12,7 @@ export const jwtSecret = 'zjP9h6ZI5LoSKCRj';
 
 @Module({
   imports: [
+    ConfigModule,
     PrismaModule,
     PassportModule,
     JwtModule.register({
