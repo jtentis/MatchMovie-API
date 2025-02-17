@@ -34,7 +34,7 @@ export class WatchedService {
     }
 
     async toggleWatched(userId: number, movieId: number): Promise<boolean> {
-        console.log('Chegando no toggleWatched com:', { userId, movieId });
+        // console.log('Chegando no toggleWatched com:', { userId, movieId });
 
         const user = await this.prisma.user.findUnique({ where: { id: userId } });
         if (!user) {
@@ -46,13 +46,13 @@ export class WatchedService {
         });
 
         if (watched) {
-            console.log('Desfavoritando o filme:', { userId, movieId });
+            // console.log('Desfavoritando o filme:', { userId, movieId });
             await this.prisma.watched.delete({
                 where: { id: watched.id },
             });
             return false;
         } else {
-            console.log('Favoritando o filme:', { userId, movieId });
+            // console.log('Favoritando o filme:', { userId, movieId });
             await this.prisma.watched.create({
                 data: { userId, movieId },
             });
@@ -75,4 +75,18 @@ export class WatchedService {
         });
     }
 
+    async getWatchedMovies(userId: number): Promise<number[]> {
+        const user = await this.prisma.user.findUnique({ where: { id: userId } });
+        if (!user) {
+            throw new NotFoundException('Usuário não encontrado.');
+        }
+    
+        const watchedMovies = await this.prisma.watched.findMany({
+            where: { userId },
+            select: { movieId: true },
+        });
+    
+        return watchedMovies.map(movie => movie.movieId);
+    }
+    
 }
