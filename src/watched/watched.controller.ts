@@ -12,7 +12,7 @@ export class WatchedController {
 
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth()
-    @ApiOperation({ summary: 'Verificar se filme já foi marcado como assistido ou não'})
+    @ApiOperation({ summary: 'Verificar se filme já foi marcado como assistido ou não' })
     @Get('isWatched/:userId/:movieId')
     async isWatched(
         @Param('userId') userId: string,
@@ -30,7 +30,7 @@ export class WatchedController {
 
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth()
-    @ApiOperation({ summary: 'Marcar filme como assistido'})
+    @ApiOperation({ summary: 'Marcar filme como assistido' })
     @Post()
     async toggleWatched(@Body() { userId, movieId }: WatchedMovieDto) {
 
@@ -49,7 +49,7 @@ export class WatchedController {
 
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth()
-    @ApiOperation({ summary: 'Contar quantidade de assistidos do usuário'})
+    @ApiOperation({ summary: 'Contar quantidade de assistidos do usuário' })
     @Get('count/:userId')
     async getFavoriteCount(@Param('userId') userId: number) {
         const count = await this.watchedService.getUserWatched(Number(userId));
@@ -57,5 +57,13 @@ export class WatchedController {
             throw new NotFoundException('User not found or has no favorites.');
         }
         return { count };
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Listar filmes marcados como assistido' })
+    @Get(':userId')
+    async getUserWatchedMovies(@Param('userId') userId: number) {
+        return this.watchedService.getWatchedMovies(Number(userId));
     }
 }

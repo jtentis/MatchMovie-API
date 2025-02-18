@@ -57,4 +57,12 @@ export class FavoritesController {
         }
         return { count };
     }
+
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Listar filmes marcados como favorito' })
+    @Get(':userId')
+    async getFavoritedMovies(@Param('userId') userId: number) {
+        return this.favoritesService.getFavoritedMovies(Number(userId));
+    }
 }
